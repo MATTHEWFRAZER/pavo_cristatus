@@ -1,0 +1,1 @@
+DEF_STRING = "def"
