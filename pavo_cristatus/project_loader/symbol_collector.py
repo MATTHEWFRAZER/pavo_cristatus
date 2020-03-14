@@ -1,0 +1,26 @@
+import collections
+
+from pavo_cristatus.module_symbols import symbol_creator
+from pavo_cristatus.project_loader.nested_symbol_collector import collect_nested_symbols
+
+__all__ = ["collect"]
+
+def convert_to_symbol_object(project_root_path, symbol, is_symbol_of_interest):
+    queue = collections.deque()
+    root_symbol = symbol_creator.create(project_root_path, symbol)
+    queue.appendleft(root_symbol)
+    while queue:
+        current = queue.pop()
+        for nested_symbol in collect_nested_symbols(current.symbol):
+            if is_symbol_of_interest(symbol.__module__, nested_symbol):
+                nested_symbol_object = symbol_creator.create(project_root_path, nested_symbol)
+                current.nested_symbols.append(nested_symbol_object)
+                queue.appendleft(nested_symbol_object)
+    return root_symbol
+
+def collect(project_root_path, module, is_symbol_of_interest):
+    filtered_symbols = collections.defaultdict(set)
+    for symbol in collect_nested_symbols(module):
+        if is_symbol_of_interest(module, symbol):
+            filtered_symbols[module.__name__].add(convert_to_symbol_object(project_root_path, symbol, is_symbol_of_interest))
+    return filtered_symbols

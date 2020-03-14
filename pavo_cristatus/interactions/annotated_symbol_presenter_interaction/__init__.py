@@ -1,0 +1,10 @@
+from pavo_cristatus.dependency_injection.ploceidae_configurator import pavo_cristatus_dependency_wrapper
+from pavo_cristatus.presenters.console_presenter import present_annotated_symbols
+from pavo_cristatus.interactions.annotated_symbol_presenter_interaction import annotated_symbol_presenter_interaction
+
+dependency_module_name = "annotated_symbol_presenter_interaction"
+
+__all__ = [dependency_module_name]
+
+dependency = lambda x: annotated_symbol_presenter_interaction.interact(x, present_annotated_symbols)
+pavo_cristatus_dependency_wrapper(resolvable_name=dependency_module_name)(lambda: dependency)

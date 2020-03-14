@@ -1,0 +1,6 @@
+ploceidae==1.0.17
+python-sql==1.1.0
+PyMonad==1.3
+trochilidae==1.0.9
+decorator==4.4.2
+picidae==1.0.6
