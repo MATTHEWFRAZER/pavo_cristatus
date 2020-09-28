@@ -75,7 +75,7 @@ class CallableSymbol(AbstractSymbol):
 
         try:
             return_annotation = " -> {0}".format(arg_spec.annotations["return"].__name__)
-        except:
+        except Exception:
             return_annotation = str()
 
         signature += "){0}:".format(return_annotation)
@@ -90,7 +90,7 @@ class CallableSymbol(AbstractSymbol):
             argument_slot = ", " + argument
             try:
                 argument_slot += " : {0}".format(arg_spec.annotations[argument].__name__)
-            except:
+            except Exception:
                 pass
             default_argument_slot = str()
             if length_of_default_tuple > 0:
@@ -161,7 +161,7 @@ class CallableSymbol(AbstractSymbol):
             vararg_annotation += ", *" + arg_spec.varargs
             try:
                 vararg_annotation += (" : " + arg_spec.annotations[arg_spec.varargs].__name__)
-            except:
+            except Exception:
                 vararg_annotation = str()
         return vararg_annotation
 
@@ -172,7 +172,7 @@ class CallableSymbol(AbstractSymbol):
             keyword_annotation += ", **" + arg_spec.varkw
             try:
                 keyword_annotation += " : " + arg_spec.annotations[arg_spec.varkw].__name__
-            except:
+            except Exception:
                 keyword_annotation = str()
         return keyword_annotation
 
@@ -182,7 +182,7 @@ class CallableSymbol(AbstractSymbol):
         for argument in arg_spec.kwonlyargs:
             try:
                 keyword_only_annotations += " : " + arg_spec.annotations[argument].__name__
-            except:
+            except Exception:
                 keyword_only_annotations = str()
             keyword_only_annotations += ", {0}{1} = {2}".format(argument, keyword_only_annotations,
                                                                 arg_spec.kwonlydefaults[argument])

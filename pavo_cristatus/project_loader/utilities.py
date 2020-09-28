@@ -27,7 +27,7 @@ def does_symbol_have_type_hint_annotations(symbol):
 def is_symbol_defined_in_module(module, symbol):
     try:
         return module == symbol.__module__
-    except:
+    except Exception:
         return False
 
 def is_annotated_symbol_of_interest_inner(module, symbol):

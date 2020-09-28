@@ -13,5 +13,5 @@ def test_convert_python_file_to_module_qualname(project_root_path, python_file):
     if any( x in project_root_path for x in ("+", ")", "(", "[", "]", "-", "*", "$", "?")):
         reject()
     convert_python_file_to_module_qualname(project_root_path, python_file)
-    #except:
+    #except Exception:
     #    reject()
