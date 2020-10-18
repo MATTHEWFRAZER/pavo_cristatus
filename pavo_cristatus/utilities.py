@@ -27,7 +27,7 @@ def convert_python_file_to_module_qualname(project_root_path, python_file):
     package = ".".join(new_package_path)
     try:
         package = package if package[0] != "." else package[1:]
-    except:
+    except Exception:
         return str()
     else:
         return ".".join((package, split_file_name[0]))
@@ -63,7 +63,7 @@ def is_dereferenceable_function(symbol):
     try:
         dereferenced_function = getattr(symbol, "__func__")
         return callable(dereferenced_function)
-    except:
+    except Exception:
         return False
 
 def write_new_source(module_symbols, get_new_source, *args):

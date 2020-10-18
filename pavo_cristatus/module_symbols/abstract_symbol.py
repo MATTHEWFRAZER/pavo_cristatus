@@ -20,7 +20,7 @@ class AbstractSymbol(object):
         self.name = symbol.__name__
         try:
             self.arg_spec = inspect.getfullargspec(symbol)
-        except:
+        except Exception:
             self.arg_spec = None
         self.nested_symbols = nested_symbols
 
