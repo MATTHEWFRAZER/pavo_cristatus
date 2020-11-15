@@ -5,6 +5,11 @@ from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatu
 __all__ = ["HigherOrderBindee"]
 
 class HigherOrderBindee(object):
+    """
+    generalizes functions so that they can be lifted into the PavoCristatusMonad, (i.e. lower level functions can remain
+    less specialized (a -> b) instead of (a -> Mb)
+    the idea is that we can have some safe guards inside of the monad (TODO: these safeguards should run at module load time)
+    """
     def __init__(self, bindee_definition):
         self.bindee_definition = bindee_definition
 

@@ -26,7 +26,7 @@ from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import ModuleFakeClassWithClassWithNestedAnnotatedFunction as AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction
 from pavo_cristatus.tests.doubles.verifiers.write_verifier import WriteVerifier
 from pavo_cristatus.tests.utilities import get_module_qualname, get_python_file_from_symbol_object, get_nested_argspecs
-from pavo_cristatus.utilities import get_data_item_id
+from pavo_cristatus.utilities import create_data_item_id
 
 unit_test_path = os.path.split(__file__)[0]
 project_root_path = os.path.normpath(os.path.join(unit_test_path, "..", "..")).replace("\\", "\\\\")
@@ -77,7 +77,7 @@ def test_symbol_signature_restorer_interaction(symbol, arg_specs, annotated_symb
     HookPoint.register(open.__name__, safe_open_hook)
 
     module_qualname = get_module_qualname(symbol, project_root_path)
-    module_annotated_data_items = {get_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
+    module_annotated_data_items = {create_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
     queue = collections.deque()
     symbol_object = symbol_collector.convert_to_symbol_object(project_root_path,
                                                                         symbol,
@@ -87,7 +87,7 @@ def test_symbol_signature_restorer_interaction(symbol, arg_specs, annotated_symb
         current = queue.pop()
         for nested_symbol in current.nested_symbols:
             queue.appendleft(nested_symbol)
-            data_item_id = get_data_item_id(module_qualname, nested_symbol.qualname)
+            data_item_id = create_data_item_id(module_qualname, nested_symbol.qualname)
             module_annotated_data_items[data_item_id] = arg_specs[nested_symbol.qualname]
 
 

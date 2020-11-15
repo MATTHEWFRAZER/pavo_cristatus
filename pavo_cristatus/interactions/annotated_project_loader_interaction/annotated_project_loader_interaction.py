@@ -7,6 +7,10 @@ __all__ = ["interact"]
 
 
 def interact(project_root):
+    """
+    :param project_root: root of the project source
+    :return: a set of ModuleSymbols within a result that will be manipulated with in the PavoCristatusMonad
+    """
     try:
         return PavoCristatusResult(load_annotated_project(project_root), PavoCristatusStatus.SUCCESS)
     except Exception as ex:

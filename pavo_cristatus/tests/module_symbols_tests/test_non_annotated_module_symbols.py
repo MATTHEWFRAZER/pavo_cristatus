@@ -18,7 +18,7 @@ from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_method import ModuleFakeClassWithInheritedAnnotatedMethod as AnnotatedModuleFakeClassWithInheritedAnnotatedMethod
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import ModuleFakeClassWithClassWithNestedAnnotatedFunction as AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction
 from pavo_cristatus.tests.utilities import get_module_qualname, get_nested_argspecs
-from pavo_cristatus.utilities import get_data_item_id
+from pavo_cristatus.utilities import create_data_item_id
 
 unit_test_path = os.path.split(__file__)[0]
 annotated_path = os.path.normpath(os.path.join(unit_test_path, "doubles", "module_fakes", "annotated"))
@@ -29,6 +29,12 @@ class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_fu
 
     def symbol_of_interest(self, a : int, b : str) -> bool:
         def nested(a : int, b : str) -> bool: pass
+
+class ModuleFakeClassWithAnnotatedFunctionAndDefault(interoperable_with_metaclass_future(ModuleFakeClass)):
+    def symbol_of_interest(self, a : int, b : str = 9) -> bool: pass
+
+class ModuleFakeClassWithNonAnnotatedFunctionAndDefault(interoperable_with_metaclass_future(ModuleFakeClass)):
+    def symbol_of_interest(self, a, b = 9): pass
 
 
 class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
@@ -61,11 +67,14 @@ class TestNonAnnotatedModuleSymbols:
                                  ModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest,
                                  get_nested_argspecs(ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
-                                 ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest)
+                                 ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
+                                (ModuleFakeClassWithNonAnnotatedFunctionAndDefault.symbol_of_interest,
+                                 {ModuleFakeClassWithNonAnnotatedFunctionAndDefault.symbol_of_interest.__qualname__ : inspect.getfullargspec(ModuleFakeClassWithAnnotatedFunctionAndDefault.symbol_of_interest)},
+                                 ModuleFakeClassWithAnnotatedFunctionAndDefault.symbol_of_interest)
                              ])
     def test_symbol_object_gives_correct_source_for_annotated_symbol(self, symbol, arg_specs, annotated_symbol):
         module_qualname = get_module_qualname(symbol, project_root_path)
-        module_annotated_data_items = {get_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
+        module_annotated_data_items = {create_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
         queue = collections.deque()
         annotated_symbol_object = symbol_collector.convert_to_symbol_object(project_root_path,
                                                                             symbol,
@@ -75,7 +84,7 @@ class TestNonAnnotatedModuleSymbols:
             current = queue.pop()
             for nested_symbol in current.nested_symbols:
                 queue.appendleft(nested_symbol)
-                data_item_id = get_data_item_id(module_qualname, nested_symbol.qualname)
+                data_item_id = create_data_item_id(module_qualname, nested_symbol.qualname)
                 module_annotated_data_items[data_item_id] = arg_specs[nested_symbol.qualname]
 
         symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, symbol, is_non_annotated_symbol_of_interest)
@@ -87,11 +96,12 @@ class TestNonAnnotatedModuleSymbols:
     @pytest.mark.parametrize("symbols", [(ModuleFakeClassWithCallables.symbol_of_interest, AnnotatedModuleFakeClassWithCallables.symbol_of_interest),
                                          (ModuleFakeClassWithClasses.SymbolOfInterest, AnnotatedModuleFakeClassWithClasses.SymbolOfInterest),
                                          (ModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest, AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest),
-                                         (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest, ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest)])
+                                         (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest, ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
+                                         (ModuleFakeClassWithNonAnnotatedFunctionAndDefault.symbol_of_interest, ModuleFakeClassWithAnnotatedFunctionAndDefault.symbol_of_interest)])
     def test_symbol_object_gives_correct_source_for_non_annotated_symbol(self, symbols):
         non_annotated_symbol, annotated_symbol = symbols
         module_qualname = get_module_qualname(non_annotated_symbol, project_root_path)
-        module_annotated_data_items = {get_data_item_id(module_qualname, non_annotated_symbol.__qualname__): inspect.getfullargspec(annotated_symbol)}
+        module_annotated_data_items = {create_data_item_id(module_qualname, non_annotated_symbol.__qualname__): inspect.getfullargspec(annotated_symbol)}
 
         queue = collections.deque()
         queue.appendleft(annotated_symbol)
@@ -101,7 +111,7 @@ class TestNonAnnotatedModuleSymbols:
                                                                            current,
                                                                            is_annotated_symbol_of_interest).nested_symbols:
                 queue.appendleft(nested_symbol.symbol)
-                module_annotated_data_items[get_data_item_id(module_qualname, nested_symbol.qualname)] = inspect.getfullargspec(nested_symbol.symbol)
+                module_annotated_data_items[create_data_item_id(module_qualname, nested_symbol.qualname)] = inspect.getfullargspec(nested_symbol.symbol)
 
 
         symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, non_annotated_symbol, is_non_annotated_symbol_of_interest)

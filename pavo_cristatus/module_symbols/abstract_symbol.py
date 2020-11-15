@@ -4,6 +4,9 @@ import re
 from pavo_cristatus.module_symbols.regex_patterns import get_class_pattern, get_function_pattern, all_whitespace_pattern
 
 class AbstractSymbol(object):
+    """
+    Abstract class for Symbol, handles finding line numbers of a this symbol in the source.
+    """
     def __init__(self, symbol, nested_symbols):
         self.symbol = symbol
         # getsource and accessing __qualname__ or __name__ can can raise an exception

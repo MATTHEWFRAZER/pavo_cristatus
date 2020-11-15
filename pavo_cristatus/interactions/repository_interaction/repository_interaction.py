@@ -4,6 +4,9 @@ from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatu
 __all__ = ["RepositoryInteraction"]
 
 class RepositoryInteraction(object):
+    """
+    generic interaction with a repository action
+    """
     def __init__(self, repository, operation, get_accumulator):
         self.repository = repository
         self.operation = operation

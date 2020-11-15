@@ -23,7 +23,7 @@ from pavo_cristatus.tests.doubles.spies.sqlite_query_result_spy import SQLiteQue
 from pavo_cristatus.tests.module_symbols_tests.test_non_annotated_module_symbols import \
     ModuleFakeClassWithNestedAnnotatedFunction
 from pavo_cristatus.tests.utilities import get_module_qualname, get_python_file_from_symbol_object
-from pavo_cristatus.utilities import get_data_item_id
+from pavo_cristatus.utilities import create_data_item_id
 
 unit_test_path = os.path.split(__file__)[0]
 project_root_path = os.path.normpath(os.path.join(unit_test_path, "..", "..")).replace("\\", "\\\\")
@@ -39,9 +39,9 @@ symbols_under_test = [#ModuleFakeClassWithCallables.non_symbol_of_interest,
 class DummyPickled(object): pass
 
 def symbols_object_generator(symbol_object):
-    yield get_data_item_id(get_module_qualname(symbol_object.symbol, project_root_path), symbol_object.qualname), pickle.dumps(DummyPickled())
+    yield create_data_item_id(get_module_qualname(symbol_object.symbol, project_root_path), symbol_object.qualname), pickle.dumps(DummyPickled())
     for nested_symbol in symbol_object.nested_symbols:
-        yield get_data_item_id(get_module_qualname(nested_symbol.symbol, project_root_path), symbol_object.qualname), pickle.dumps(DummyPickled())
+        yield create_data_item_id(get_module_qualname(nested_symbol.symbol, project_root_path), symbol_object.qualname), pickle.dumps(DummyPickled())
 
 class TestRepositoryInteraction:
 

@@ -5,7 +5,7 @@ import sys
 
 from pavo_cristatus.project_loader.nested_symbol_collector import collect_nested_symbols
 from pavo_cristatus.python_file import PythonFile
-from pavo_cristatus.utilities import convert_python_file_to_module_qualname, get_data_item_id, is_symbol_callable
+from pavo_cristatus.utilities import convert_python_file_to_module_qualname, create_data_item_id, is_symbol_callable
 
 
 def get_module_qualname(symbol, project_root_path):

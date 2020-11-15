@@ -12,7 +12,7 @@ PYTHON_EXTENSION = ".py"
 
 access_interaction_callable = access_attribute("interact")
 
-def get_data_item_id(module_qualname, symbol_qualname):
+def create_data_item_id(module_qualname, symbol_qualname):
     return "{0}.{1}".format(module_qualname, symbol_qualname)
 
 def convert_python_file_to_module_qualname(project_root_path, python_file):

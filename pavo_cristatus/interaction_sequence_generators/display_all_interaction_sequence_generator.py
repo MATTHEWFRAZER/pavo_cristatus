@@ -9,6 +9,13 @@ def display_all_interaction_sequence_generator(non_annotated_project_loader_inte
                                                sql_repository_read_interaction,
                                                symbol_signature_restorer_interaction,
                                                annotated_symbol_presenter_interaction):
+    """
+    This generator of interactions will be manipulated by the PavoCristatusMonad
+    :param non_annotated_project_loader_interaction: collect all non annotated symbols in a project
+    :param sql_repository_read_interaction: collect all the symbols type hint information
+    :param symbol_signature_restorer_interaction: restores the symbols to their previous annotated form
+    :param annotated_symbol_presenter_interaction: presents the annotated symbols to the user
+    """
     is_set = get_type_check(set)
     is_defaultdict = get_type_check(defaultdict)
     # given a project root as a string we collect all the modules and relevant symbols under said project

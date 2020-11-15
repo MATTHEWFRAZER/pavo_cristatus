@@ -27,7 +27,7 @@ from pavo_cristatus.interactions.annotated_symbol_presenter_interaction.annotate
 from pavo_cristatus.presenters.console_presenter import present_annotated_symbols
 from pavo_cristatus.tests.doubles.verifiers.write_verifier import WriteVerifier
 from pavo_cristatus.tests.utilities import get_nested_argspecs, get_module_qualname, get_python_file_from_symbol_object
-from pavo_cristatus.utilities import get_data_item_id
+from pavo_cristatus.utilities import create_data_item_id
 
 
 class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
@@ -80,7 +80,7 @@ def test_annotated_symbol_presenter_interaction(symbol, arg_specs, annotated_sym
 
     module_qualname = get_module_qualname(symbol, project_root_path)
     module_annotated_data_items = {
-        get_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
+        create_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
     queue = collections.deque()
     symbol_object = symbol_collector.convert_to_symbol_object(project_root_path,
                                                               symbol,
@@ -90,7 +90,7 @@ def test_annotated_symbol_presenter_interaction(symbol, arg_specs, annotated_sym
         current = queue.pop()
         for nested_symbol in current.nested_symbols:
             queue.appendleft(nested_symbol)
-            data_item_id = get_data_item_id(module_qualname, nested_symbol.qualname)
+            data_item_id = create_data_item_id(module_qualname, nested_symbol.qualname)
             module_annotated_data_items[data_item_id] = arg_specs[nested_symbol.qualname]
 
     python_file = get_python_file_from_symbol_object(symbol_object)

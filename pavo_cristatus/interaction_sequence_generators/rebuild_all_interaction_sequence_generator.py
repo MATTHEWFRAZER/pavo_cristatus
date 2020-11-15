@@ -6,6 +6,13 @@ __all__ = ["rebuild_all_interaction_sequence_generator"]
 def rebuild_all_interaction_sequence_generator(annotated_project_loader_interaction,
                                                symbol_signature_replacer_interaction,
                                                sql_repository_write_interaction):
+    """
+    This generator of interactions will be manipulated by the PavoCristatusMonad
+    rebuilds a new source project without annotation, storing the existing annotations in a db
+    :param annotated_project_loader_interaction: collects all symbols and arg specs
+    :param symbol_signature_replacer_interaction: replace symbol signatures with non annotated versions
+    :param sql_repository_write_interaction: stores signatures and type hint information in a db
+    """
     is_set = get_type_check(set)
     # given a project root as a string we collect all the modules and relevant symbols
     # along with their arg specs under said project and delivers those to the next interaction
