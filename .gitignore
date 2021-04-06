@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# pavo_cristatus db
+pavo_cristatus.pb

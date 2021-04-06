@@ -9,7 +9,8 @@ from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatu
 from pavo_cristatus.module_symbols.module_symbols import ModuleSymbols
 from pavo_cristatus.project_loader import symbol_collector
 from pavo_cristatus.project_loader.utilities import is_non_annotated_symbol_of_interest
-from pavo_cristatus.testability.hook_point import HookPoint
+from pavo_cristatus.presenters import console_presenter
+from pavo_cristatus.presenters.console_presenter import pavo_cristatus_print
 from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFakeClass
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import \
     ModuleFakeClassWithCallables
@@ -75,8 +76,8 @@ def print_hook(*args, **kwargs):
                                     get_nested_argspecs(ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
                                     ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest)
                              ])
-def test_annotated_symbol_presenter_interaction(symbol, arg_specs, annotated_symbol):
-    HookPoint.register(print.__name__, print_hook)
+def test_annotated_symbol_presenter_interaction(monkeypatch, symbol, arg_specs, annotated_symbol):
+    monkeypatch.setattr(console_presenter, pavo_cristatus_print.__name__, print_hook)
 
     module_qualname = get_module_qualname(symbol, project_root_path)
     module_annotated_data_items = {
