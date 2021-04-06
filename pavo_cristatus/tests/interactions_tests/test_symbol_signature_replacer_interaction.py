@@ -9,7 +9,8 @@ from pavo_cristatus.interactions.symbol_signature_replacer_interaction.symbol_si
 from pavo_cristatus.module_symbols.module_symbols import ModuleSymbols
 from pavo_cristatus.project_loader import symbol_collector
 from pavo_cristatus.project_loader.utilities import is_annotated_symbol_of_interest, is_non_annotated_symbol_of_interest
-from pavo_cristatus.testability.hook_point import HookPoint
+from pavo_cristatus import utilities
+from pavo_cristatus.utilities import pavo_cristatus_open
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import \
     ModuleFakeClassWithCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import \
@@ -37,8 +38,8 @@ symbols_under_test = [ModuleFakeClassWithCallables.non_symbol_of_interest,
                       ModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest]
 
 @pytest.mark.parametrize("symbol", symbols_under_test)
-def test_symbol_signature_replacer_interaction(symbol):
-    HookPoint.register(open.__name__, safe_open_hook)
+def test_symbol_signature_replacer_interaction(monkeypatch, symbol):
+    monkeypatch.setattr(utilities, pavo_cristatus_open.__name__, safe_open_hook)
 
     symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, symbol, is_annotated_symbol_of_interest)
     python_file = get_python_file_from_symbol_object(symbol_object)

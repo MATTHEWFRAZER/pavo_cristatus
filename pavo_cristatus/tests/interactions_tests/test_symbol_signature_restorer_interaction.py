@@ -10,7 +10,8 @@ from pavo_cristatus.interactions.symbol_signature_restorer_interaction.symbol_si
 from pavo_cristatus.module_symbols.module_symbols import ModuleSymbols
 from pavo_cristatus.project_loader import symbol_collector
 from pavo_cristatus.project_loader.utilities import is_non_annotated_symbol_of_interest
-from pavo_cristatus.testability.hook_point import HookPoint
+from pavo_cristatus import utilities
+from pavo_cristatus.utilities import pavo_cristatus_open
 from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFakeClass
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import \
     ModuleFakeClassWithCallables
@@ -73,8 +74,8 @@ def safe_open_hook(*args, **kwargs):
                                  get_nested_argspecs(ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
                                  ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest)
                              ])
-def test_symbol_signature_restorer_interaction(symbol, arg_specs, annotated_symbol):
-    HookPoint.register(open.__name__, safe_open_hook)
+def test_symbol_signature_restorer_interaction(monkeypatch, symbol, arg_specs, annotated_symbol):
+    monkeypatch.setattr(utilities, pavo_cristatus_open.__name__, safe_open_hook)
 
     module_qualname = get_module_qualname(symbol, project_root_path)
     module_annotated_data_items = {create_data_item_id(module_qualname, symbol.__qualname__): arg_specs[symbol.__qualname__]}
