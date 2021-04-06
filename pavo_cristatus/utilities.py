@@ -6,7 +6,6 @@ from trochilidae.interoperable_filter import interoperable_filter
 from picidae import access_attribute
 
 from pavo_cristatus.python_file import PythonFile
-from pavo_cristatus.testability.hook_point import HookPoint
 
 PYTHON_EXTENSION = ".py"
 
@@ -17,7 +16,12 @@ def create_data_item_id(module_qualname, symbol_qualname):
 
 def convert_python_file_to_module_qualname(project_root_path, python_file):
     split_file_name = os.path.splitext(python_file.file_name)
-    match = re.search(project_root_path, python_file.package_path)
+
+    try:
+        match = re.search(project_root_path, python_file.package_path)
+    except re.error:
+        return str()
+
     if match is None:
         return str()
     span = match.span()
@@ -68,6 +72,9 @@ def is_dereferenceable_function(symbol):
 
 def write_new_source(module_symbols, get_new_source, *args):
     new_source = get_new_source(module_symbols)(*args)
-    with HookPoint.call(open.__name__, open, module_symbols.path, "w") as project_file:
+    with pavo_cristatus_open(module_symbols.path, "w") as project_file:
         project_file.write(new_source)
     return True
+
+def pavo_cristatus_open(module_symbols_path, mode):
+    return open(module_symbols_path, mode)
