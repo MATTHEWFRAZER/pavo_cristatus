@@ -10,7 +10,7 @@ jobs:
   # build our project
   build:
     if: github.event.pull_request.merged == true
-    
+
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -21,6 +21,19 @@ jobs:
         with:
           fetch-depth: 0
           ref: develop
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: install
+        run: |
+          pip install --upgrade setuptools
+          pip install -r requirements.txt
+          pip install tox
+
+      - name: run tox
+        run: tox
 
       # HACK ALERT: awk was being absolutely retarded... It returns the incorrect column for git log. I think it has to do with the string containing a "/"
       # we find the merge commit as it will be first commit with a BOBA branch as a ref and pull the ref from that commit
