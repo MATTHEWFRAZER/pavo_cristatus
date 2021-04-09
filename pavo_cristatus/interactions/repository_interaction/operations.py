@@ -1,5 +1,6 @@
 import logging
 import pickle
+import base64
 
 from pavo_cristatus.repositories.data_item import DataItem
 from pavo_cristatus.utilities import create_data_item_id
@@ -16,7 +17,9 @@ def create_data_item(module_qualname, symbol):
     :return: new data item
     """
     data_item_id = "{0}.{1}".format(module_qualname, symbol.qualname)
-    data_item_data = pickle.dumps(symbol.arg_spec)
+    byte_data = pickle.dumps(symbol.arg_spec)
+    base64_data = base64.b64encode(byte_data)
+    data_item_data = str(base64_data, "utf-8")
     data_item = DataItem(data_item_id, data_item_data)
     return data_item
 
@@ -32,9 +35,12 @@ def read_data_item(module_symbols, symbol, repository, accumulator):
     data_item_id = create_data_item_id(module_symbols.qualname, symbol.qualname)
     data_item = repository.read_data_item(data_item_id)
     if not data_item:
-        logger.error("could not successfully operate on data item. data id: {0}".format(data_item_id))
-        return False
-    accumulator[module_symbols][data_item.id] = pickle.loads(data_item.data)
+        # TODO: look into this
+        #logger.error("could not successfully operate on data item. data id: {0}".format(data_item_id))
+        #return False
+        return True
+    data_item_data = base64.b64decode(data_item.data)
+    accumulator[module_symbols][data_item.id] = pickle.loads(data_item_data)
     return True
 
 def write_data_item(module_symbols, symbol, repository):

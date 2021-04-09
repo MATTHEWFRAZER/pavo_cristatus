@@ -1,6 +1,7 @@
 import inspect
 import os
 import pickle
+import base64
 
 import pytest
 
@@ -39,9 +40,13 @@ symbols_under_test = [#ModuleFakeClassWithCallables.non_symbol_of_interest,
 class DummyPickled(object): pass
 
 def symbols_object_generator(symbol_object):
-    yield create_data_item_id(get_module_qualname(symbol_object.symbol, project_root_path), symbol_object.qualname), pickle.dumps(DummyPickled())
+    base64_data = base64.b64encode(pickle.dumps(DummyPickled()))
+    data_item_data = str(base64_data, "utf-8")
+    yield create_data_item_id(get_module_qualname(symbol_object.symbol, project_root_path), symbol_object.qualname), data_item_data
     for nested_symbol in symbol_object.nested_symbols:
-        yield create_data_item_id(get_module_qualname(nested_symbol.symbol, project_root_path), symbol_object.qualname), pickle.dumps(DummyPickled())
+        base64_data = base64.b64encode(pickle.dumps(DummyPickled()))
+        data_item_data = str(base64_data, "utf-8")
+        yield create_data_item_id(get_module_qualname(nested_symbol.symbol, project_root_path), symbol_object.qualname), data_item_data
 
 class TestRepositoryInteraction:
 

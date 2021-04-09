@@ -1,9 +1,9 @@
 from itertools import chain
 
-__all__ = ["collect_nested_symbols_in_object_dict"]
-
 from pavo_cristatus.utilities import collect_nested_symbols_in_object_source
 
+
+__all__ = ["collect_nested_symbols_in_object_dict"]
 
 def collect_nested_symbols(symbol):
     """

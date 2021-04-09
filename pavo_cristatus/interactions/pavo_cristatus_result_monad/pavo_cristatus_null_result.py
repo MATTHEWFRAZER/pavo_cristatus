@@ -8,3 +8,6 @@ class PavoCristatusNullResult(PavoCristatusResultMonad):
     """
     def bind(self, _):
         return self
+
+    def is_success(self):
+        return False
