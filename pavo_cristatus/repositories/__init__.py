@@ -9,6 +9,5 @@ __all__ = ["SQLiteRepository"]
 def database_connection(database_path):
     return sqlite3.connect(database_path)
 
-pavo_cristatus_dependency_wrapper(database_connection)
+pavo_cristatus_dependency_wrapper()(database_connection)
 pavo_cristatus_dependency_wrapper(resolvable_name="sqlite_repository")(SQLiteRepository)
-

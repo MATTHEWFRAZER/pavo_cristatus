@@ -18,7 +18,13 @@ def load_modules_into_module_symbol_objects(project_root_path, python_files, is_
     project_symbols = set()
     for python_file in python_files:
         module_qualname = convert_python_file_to_module_qualname(project_root_path, python_file)
-        module = importlib.import_module(module_qualname)
+        if module_qualname.endswith("__init__"):
+            continue
+        try:
+            module = importlib.import_module(module_qualname)
+        except (ValueError, ModuleNotFoundError):
+            continue
+            #raise ValueError("given module_qualname could not be imported: {0}".format(module_qualname))
         symbols = symbol_collector.collect(project_root_path, module, is_symbol_of_interest)
         module_symbols = ModuleSymbols(module, python_file, module_qualname, symbols)
         project_symbols.add(module_symbols)

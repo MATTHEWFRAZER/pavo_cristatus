@@ -129,4 +129,7 @@ dmypy.json
 .pyre/
 
 # pavo_cristatus db
-pavo_cristatus.pb
+pavo_cristatus.db
+
+# pavo_cristatus testing
+project_fake

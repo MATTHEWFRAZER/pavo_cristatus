@@ -6,6 +6,6 @@ __all__ = ["ModuleFakeClassWithClasses"]
 
 class ModuleFakeClassWithClasses(interoperable_with_metaclass_future(ModuleFakeClass)):
     class SymbolOfInterest:
-        def symbol_of_interest(self): pass
+        def symbol_of_interest(self, a, b): pass
     class NonSymbolOfInterest:
         def non_symbol_of_interest(self, a : int, b : str) -> bool: pass

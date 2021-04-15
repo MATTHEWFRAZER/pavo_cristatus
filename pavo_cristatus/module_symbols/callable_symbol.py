@@ -4,7 +4,7 @@ import itertools
 import operator
 import os
 
-from picidae import access_attribute, expand_parameter_list_by_x
+from picidae import access_attribute
 from trochilidae.interoperable_reduce import interoperable_reduce
 
 from pavo_cristatus.constants import DEF_STRING
@@ -58,7 +58,7 @@ class CallableSymbol(AbstractSymbol):
         :param module_qualname: used to create a data_item_id
         :return: the symbol's source as a string
         """
-        arg_spec =  module_annotated_data_items[create_data_item_id(module_qualname, self.qualname)]
+        arg_spec = module_annotated_data_items.get(create_data_item_id(module_qualname, self.qualname), None)
         if arg_spec is None:
             return line
         return self.get_annotated_signature_inner(line, arg_spec)

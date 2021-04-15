@@ -1,4 +1,5 @@
 import collections
+import sys
 
 from pavo_cristatus.module_symbols import symbol_creator
 from pavo_cristatus.project_loader.nested_symbol_collector import collect_nested_symbols
@@ -19,7 +20,7 @@ def convert_to_symbol_object(project_root_path, symbol, is_symbol_of_interest):
     while queue:
         current = queue.pop()
         for nested_symbol in collect_nested_symbols(current.symbol):
-            if is_symbol_of_interest(symbol.__module__, nested_symbol):
+            if is_symbol_of_interest(sys.modules[symbol.__module__], nested_symbol):
                 nested_symbol_object = symbol_creator.create(project_root_path, nested_symbol)
                 current.nested_symbols.append(nested_symbol_object)
                 queue.appendleft(nested_symbol_object)
@@ -31,10 +32,10 @@ def collect(project_root_path, module, is_symbol_of_interest):
     :param project_root_path: symbols we will use to write out new source code
     :param module: used to collect symbols
     :param is_symbol_of_interest: predicate that determines if a symbol is of interest
-    :return: default dict of symbols of interest
+    :return: set of symbols of interest
     """
-    filtered_symbols = collections.defaultdict(set)
+    filtered_symbols = set()
     for symbol in collect_nested_symbols(module):
         if is_symbol_of_interest(module, symbol):
-            filtered_symbols[module.__name__].add(convert_to_symbol_object(project_root_path, symbol, is_symbol_of_interest))
+            filtered_symbols.add(convert_to_symbol_object(project_root_path, symbol, is_symbol_of_interest))
     return filtered_symbols

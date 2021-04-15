@@ -28,11 +28,11 @@ class ModuleSymbols(object):
         :return: module source as a string
         """
         source = inspect.getsource(self.module)
-        source_lines = source.split()
+        source_lines = source.split("\n")  # TODO: figure out why os.linesep does not work
         for symbol in self.symbols:
             line_number = symbol.find_line_number_of_symbol_in_source(source)
             current_source = get_source_strategy(symbol)(*args)
-            for line in current_source.split():
+            for line in current_source.split("\n"):
                 source_lines[line_number] = line
                 line_number += 1
         return "\n".join(source_lines)

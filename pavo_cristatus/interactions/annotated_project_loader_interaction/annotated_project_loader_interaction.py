@@ -14,4 +14,4 @@ def interact(project_root):
     try:
         return PavoCristatusResult(load_annotated_project(project_root), PavoCristatusStatus.SUCCESS)
     except Exception as ex:
-        return PavoCristatusResult(None, PavoCristatusStatus.FAILURE, ex.message)
+        return PavoCristatusResult(None, PavoCristatusStatus.FAILURE, str(ex))

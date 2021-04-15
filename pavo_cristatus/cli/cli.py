@@ -1,28 +1,42 @@
 import argparse
 import operator
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join("..", "..")))
 
 from trochilidae.interoperable_reduce import interoperable_reduce
 from trochilidae.interoperable_map import interoperable_map
 
-from pavo_cristatus.interaction_sequence_generators import rebuild_all_interaction_sequence_generator
+from pavo_cristatus.interaction_sequence_generators import rebuild_all_interaction_sequence_generator, display_all_interaction_sequence_generator
 from pavo_cristatus.dependency_injection.ploceidae_configurator import pavo_cristatus_container, pavo_cristatus_dependency_wrapper
-from pavo_cristatus.interaction_sequence_generators.display_all_interaction_sequence_generator import \
-    display_all_interaction_sequence_generator
 from pavo_cristatus.interactions.pavo_cristatus_result_monad.higher_order_bindee import HigherOrderBindee
 from pavo_cristatus.interactions.pavo_cristatus_result_monad.pavo_cristatus_result_monad import PavoCristatusResultMonad
 from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatus
 
+REBUILD_ALL = "rebuild-all"
+DISPLAY_ALL = "display-all"
+
 parser = argparse.ArgumentParser(description="pavo cristatus cli")
-subparsers = parser.add_subparsers()
-rebuild_all_subparser = subparsers.add_parser("RebuildAll")
-rebuild_all_subparser.add_argument("--project-root", type=str, required=True)
-rebuild_all_subparser.add_argument("--database-path", type=str, default=None)
+parser.add_argument("--subparser-choice", type=str, required=True, choices=[REBUILD_ALL, DISPLAY_ALL], dest="subparser_choice")
+parser.add_argument("--project-root", type=str, required=True, dest="project_root")
+parser.add_argument("--database-path", type=str, default=None, dest="database_path")
+# TODO: leaving these incase we need a subparser (had to figure this out by trial and error since there are no examples out there)
+#subparsers = parser.add_subparsers()
+#pavo_cristatus_subparser = subparsers.add_parser("SubParser")
+#pavo_cristatus_subparser.add_argument("--project-root", type=str, required=True, dest="project_root")
+#pavo_cristatus_subparser.add_argument("--database-path", type=str, default=None, dest="database_path")
 
 def main():
     arguments = parser.parse_args()
-    project_root = arguments.project_root
+    subparser_choice = arguments.subparser_choice
+    project_root = os.path.abspath(arguments.project_root)
     database_path = arguments.database_path
+
+    #TODO: see above
+    #arguments = pavo_cristatus_subparser.parse_args()
+    #project_root = os.path.abspath(arguments.project_root)
+    #database_path = arguments.database_path
 
     if database_path is None:
         database_path = os.path.join(project_root, "pavo_cristatus.db")
@@ -32,23 +46,24 @@ def main():
     pavo_cristatus_dependency_wrapper(resolvable_name="project_root")(lambda: project_root)
     pavo_cristatus_dependency_wrapper(resolvable_name="database_path")(lambda: database_path)
 
-    if arguments.rebuild_all:
-        sequence_name = "rebuild all"
+    if subparser_choice == REBUILD_ALL:
+        sequence_name = REBUILD_ALL
         initial_argument = project_root
-        generator = pavo_cristatus_container.resolve_dependencies(rebuild_all_interaction_sequence_generator)
-    elif arguments.display_all:
-        sequence_name = "display_all"
+        generator = pavo_cristatus_container.wire_dependencies(rebuild_all_interaction_sequence_generator)
+    elif subparser_choice == DISPLAY_ALL:
+        sequence_name = DISPLAY_ALL
         initial_argument = project_root
-        generator = pavo_cristatus_container.resolve_dependencies(display_all_interaction_sequence_generator)
+        generator = pavo_cristatus_container.wire_dependencies(display_all_interaction_sequence_generator)
     else:
         print("invalid operation")
-        exit(1)
+        exit(-1)
+
 
     result = interoperable_reduce(operator.rshift, interoperable_map(lambda x: HigherOrderBindee(x).__call__, generator), PavoCristatusResultMonad(initial_argument))
-    if result.value_to_patch_in.status == PavoCristatusStatus.SUCCESS:
+    if result.is_success():
         print("succesfully completed {0} command".format(sequence_name))
     else:
-        print(result.value_to_patch_in.message)
+        print(result.value)
 
 
 if __name__ == "__main__":

@@ -19,9 +19,10 @@ class HigherOrderBindee(object):
 
         out_result = self.bindee_definition.bindee_function(in_parameter)
 
+        if out_result.status == PavoCristatusStatus.FAILURE:
+            return PavoCristatusNullResult("failed: {0}".format(out_result.message))
+
         if not self.bindee_definition.out_parameter_predicate(out_result.result):
             raise TypeError("actual out parameter does not align with expected")
 
-        if out_result.status == PavoCristatusStatus.FAILURE:
-            return PavoCristatusNullResult("failed in {0}: {1}".format(self.bindee_definition.value_name_to_patch_in, out_result.message))
         return PavoCristatusResultMonad(out_result.result)

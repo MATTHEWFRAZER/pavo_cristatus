@@ -7,3 +7,6 @@ class PavoCristatusResultMonad(Monad):
 
     def bind(self, function):
         return function(self.value)
+
+    def is_success(self):
+        return True
