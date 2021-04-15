@@ -3,7 +3,7 @@ class SQLiteCursorSpy(object):
         self.query_result_spy = query_result_spy
         self.execute_calls = 0
 
-    def execute(self, _):
+    def execute(self, x, *y):
         self.execute_calls += 1
         return self.query_result_spy
 
