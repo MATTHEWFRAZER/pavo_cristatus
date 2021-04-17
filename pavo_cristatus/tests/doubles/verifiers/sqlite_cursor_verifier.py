@@ -14,7 +14,7 @@ class SQLiteCursorVerifier(object):
     def verify(self, data_items, expected_value):
         sqlite_query_result_spy = SQLiteQueryResultSpy(expected_value, true)
         sqlite_cursor_spy = SQLiteCursorSpy(sqlite_query_result_spy)
-        sqlite_repository = SQLiteRepository(str(), sqlite_cursor_spy)
+        sqlite_repository = SQLiteRepository(sqlite_cursor_spy)
         for data in data_items:
             result = self.operation_accessor(sqlite_repository)(data)
             assert self.post_operation_accessor(result)

@@ -2,9 +2,9 @@ import inspect
 import os
 import re
 
-from trochilidae.interoperable_filter import interoperable_filter
 from picidae import access_attribute
 
+from pavo_cristatus.constants import DECORATOR_STRING
 from pavo_cristatus.python_file import PythonFile
 
 PYTHON_EXTENSION = ".py"
@@ -52,51 +52,6 @@ def collect_python_files_under_project_root(project_root_path):
             if file_name.endswith(PYTHON_EXTENSION):
                 yield PythonFile(file_name, package_path)
 
-def collect_nested_symbols_in_object_source(symbol):
-    code_object = getattr(symbol, "__code__", tuple())
-    nested_const = getattr(code_object, "co_consts", tuple())
-    nested_code_objects = interoperable_filter(lambda x: code_object is not None and type(x) is type(code_object), nested_const)
-
-
-    for nested_code_object in nested_code_objects:
-        # first -> we need to solve how to get dependencies of the target (separate module) -> we then need to import those (load the module here?)
-        # -> then we continue
-        # 1. problem is what if we have a version conflict? (virtual env? Can we sandbox things where within the process, we have a separate env)
-        # 2. what is an alternative
-        try:
-            source = inspect.getsource(nested_code_object).strip()
-        except OSError:
-            continue
-
-        nested_symbol = resolve_nested_symbol(source, symbol, nested_code_object)
-        if nested_symbol is None:
-            continue
-
-        yield nested_symbol
-
-def resolve_nested_symbol(source, symbol, nested_code_object):
-    try:
-        compiled_source = compile(source, '<string>', 'exec')
-    except Exception:
-        return None
-
-    namespace = {}
-    try:
-        # TODO: find out if I can eliminate this security risk. Right now it is what I have for retrieving nested symbols
-        exec(compiled_source, namespace)
-    except Exception:
-        return None
-
-    try:
-        nested_symbol = namespace[nested_code_object.co_name]
-    except KeyError:
-        return None
-
-    nested_symbol.__module__ = symbol.__module__
-    nested_symbol.pavo_cristatus_nested_symbol_source = source
-
-    return nested_symbol
-
 def is_symbol_callable(symbol):
     return callable(symbol) or is_dereferenceable_function(symbol)
 
@@ -115,3 +70,15 @@ def write_new_source(module_symbols, get_new_source, *args):
 
 def pavo_cristatus_open(module_symbols_path, mode):
     return open(module_symbols_path, mode)
+
+def pavo_cristatus_split(line):
+    return line.split("\n")
+
+def pavo_cristatus_get_source(symbol):
+    if not hasattr(symbol, "pavo_cristatus_original_source"):
+        return inspect.getsource(symbol)
+    else:
+        return symbol.pavo_cristatus_original_source
+
+def is_decorator_line(line):
+        return line.strip().startswith(DECORATOR_STRING)
