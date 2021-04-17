@@ -18,6 +18,7 @@ def load_modules_into_module_symbol_objects(project_root_path, python_files, is_
     project_symbols = set()
     for python_file in python_files:
         module_qualname = convert_python_file_to_module_qualname(project_root_path, python_file)
+        # TODO: figure out how to avoid filtering __init__ files
         if module_qualname.endswith("__init__"):
             continue
         try:
