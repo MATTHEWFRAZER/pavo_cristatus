@@ -1,27 +1,53 @@
 from itertools import chain
 
-from pavo_cristatus.utilities import collect_nested_symbols_in_object_source
+from trochilidae.interoperable_filter import interoperable_filter
+
+from pavo_cristatus.constants import LAMBDA_STRING
+from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
 
 
 __all__ = ["collect_nested_symbols_in_object_dict"]
 
-def collect_nested_symbols(symbol):
+def collect_nested_symbols(normalized_symbol):
     """
     from a symbol object, collect nested symbols
-    :param symbol: used to collect nested symbols
+    :param normalized_symbol: used to collect nested symbols
     :return: iterable of nested symbols
     """
-    dict_values = collect_nested_symbols_in_object_dict(symbol)
-    nested_code_objects = collect_nested_symbols_in_object_source(symbol)
+    dict_values = collect_nested_symbols_in_object_dict(normalized_symbol)
+    nested_code_objects = collect_nested_symbols_in_object_source(normalized_symbol)
     return chain.from_iterable((dict_values, nested_code_objects))
 
-def collect_nested_symbols_in_object_dict(symbol):
+def collect_nested_symbols_in_object_dict(normalized_symbol):
     """
     from a symbol object, get its values list
-    :param symbol: used to find nested symbols in a a symbols object dict
-    :return: dict values from symbol
+    :param normalized_symbol: used to find nested symbols in a a symbols object dict
+    :return: generator of NormalizedSymbol
     """
-    try:
-        return symbol.__dict__.values()
-    except AttributeError:
-        return tuple()
+    for nested_symbol_name, nested_symbol in normalized_symbol.symbol.__dict__.items():
+        if nested_symbol is None:
+            continue
+        # there is potential in the case of a decorator where the symbol's name does not match its name in the namespace
+        try:
+            yield NormalizedSymbol(nested_symbol, normalized_symbol, nested_symbol_name)
+        except ValueError:
+            continue
+
+def collect_nested_symbols_in_object_source(normalized_symbol):
+    """
+    from a symbol object, get its values list
+    :param normalized_symbol: used to find nested symbols in a a symbols object dict
+    :return: generator of NormalizedSymbol
+    """
+    code_object = getattr(normalized_symbol.symbol, "__code__", tuple())
+    nested_const = getattr(code_object, "co_consts", tuple())
+    nested_code_objects = interoperable_filter(lambda x: code_object is not None and type(x) is type(code_object) and code_object.co_name != LAMBDA_STRING, nested_const)
+    for nested_code_object in nested_code_objects:
+        if nested_code_object is None:
+            continue
+        try:
+            yield NormalizedSymbol.from_context_with_no_symbol(normalized_symbol, nested_code_object.co_name)
+        except ValueError:
+            continue
+
+

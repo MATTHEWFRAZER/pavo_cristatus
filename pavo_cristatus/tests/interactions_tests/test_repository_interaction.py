@@ -9,16 +9,17 @@ from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatu
 from pavo_cristatus.interactions.repository_interaction import sql_repository_write_interaction, sql_repository_read_interaction
 from pavo_cristatus.module_symbols.module_symbols import ModuleSymbols
 from pavo_cristatus.project_loader import symbol_collector
+from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
 from pavo_cristatus.project_loader.utilities import is_annotated_symbol_of_interest
 from pavo_cristatus.repositories import SQLiteRepository
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import \
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callables import \
     ModuleFakeClassWithCallables
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import \
-    ModuleFakeClassWithClassWithNestedAnnotatedFunction
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes_with_nested_annotated_callables import \
+    ModuleFakeClassWithClassesWithNestedAnnotatedCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes import \
     ModuleFakeClassWithClasses
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_method import \
-    ModuleFakeClassWithInheritedAnnotatedMethod
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_callables import \
+    ModuleFakeClassWithInheritedAnnotatedCallables
 from pavo_cristatus.tests.doubles.spies.sqlite_cursor_spy import SQLiteCursorSpy
 from pavo_cristatus.tests.doubles.spies.sqlite_query_result_spy import SQLiteQueryResultSpy
 from pavo_cristatus.tests.module_symbols_tests.test_non_annotated_module_symbols import \
@@ -29,30 +30,30 @@ from pavo_cristatus.utilities import create_data_item_id
 unit_test_path = os.path.split(__file__)[0]
 project_root_path = os.path.normpath(os.path.join(unit_test_path, "..", "..")).replace("\\", "\\\\")
 
-symbols_under_test = [#ModuleFakeClassWithCallables.non_symbol_of_interest,
-                      #ModuleFakeClassWithClasses.NonSymbolOfInterest,
-                      #ModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest,
-                      #ModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest,
-                      #ModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest,
-                      ModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest,]
-                      #ModuleFakeClassWithNestedAnnotatedFunction.non_symbol_of_interest]
+symbols_under_test = [ModuleFakeClassWithCallables.non_symbol_of_interest,
+                      ModuleFakeClassWithClasses.NonSymbolOfInterest,
+                      ModuleFakeClassWithInheritedAnnotatedCallables.SymbolOfInterest,
+                      ModuleFakeClassWithInheritedAnnotatedCallables.NonSymbolOfInterest,
+                      ModuleFakeClassWithClassesWithNestedAnnotatedCallables.NonSymbolOfInterest,
+                      ModuleFakeClassWithClassesWithNestedAnnotatedCallables.SymbolOfInterest,
+                      ModuleFakeClassWithNestedAnnotatedFunction.non_symbol_of_interest]
 
 class DummyPickled(object): pass
 
 def symbols_object_generator(symbol_object):
     base64_data = base64.b64encode(pickle.dumps(DummyPickled()))
     data_item_data = str(base64_data, "utf-8")
-    yield create_data_item_id(get_module_qualname(symbol_object.symbol, project_root_path), symbol_object.qualname), data_item_data
+    yield create_data_item_id(get_module_qualname(symbol_object.normalized_symbol.symbol, project_root_path), symbol_object.qualname), data_item_data
     for nested_symbol in symbol_object.nested_symbols:
         base64_data = base64.b64encode(pickle.dumps(DummyPickled()))
         data_item_data = str(base64_data, "utf-8")
-        yield create_data_item_id(get_module_qualname(nested_symbol.symbol, project_root_path), symbol_object.qualname), data_item_data
+        yield create_data_item_id(get_module_qualname(nested_symbol.normalized_symbol.symbol, project_root_path), symbol_object.qualname), data_item_data
 
 class TestRepositoryInteraction:
 
     @pytest.mark.parametrize("symbol", symbols_under_test)
     def test_write_interaction(self, symbol):
-        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, symbol,
+        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, NormalizedSymbol(symbol, None, None),
                                                                   is_annotated_symbol_of_interest)
 
         python_file = get_python_file_from_symbol_object(symbol_object)
@@ -61,13 +62,13 @@ class TestRepositoryInteraction:
 
         sqlite_query_result_spy = SQLiteQueryResultSpy(1, lambda: {module_symbols})
         sqlite_cursor_spy = SQLiteCursorSpy(sqlite_query_result_spy)
-        sqlite_repository = SQLiteRepository(str(), sqlite_cursor_spy)
+        sqlite_repository = SQLiteRepository(sqlite_cursor_spy)
         assert sql_repository_write_interaction(sqlite_repository).interact({module_symbols}).status == PavoCristatusStatus.SUCCESS
         assert sqlite_cursor_spy.execute_calls == len(symbol_object.nested_symbols) + 3
 
     @pytest.mark.parametrize("symbol", symbols_under_test)
     def test_read_interaction(self, symbol):
-        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, symbol,
+        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, NormalizedSymbol(symbol, None, None),
                                                                   is_annotated_symbol_of_interest)
         gen = symbols_object_generator(symbol_object)
 
@@ -83,7 +84,7 @@ class TestRepositoryInteraction:
 
         sqlite_query_result_spy = SQLiteQueryResultSpy(len(symbol_object.nested_symbols) + 1, lazy_result)
         sqlite_cursor_spy = SQLiteCursorSpy(sqlite_query_result_spy)
-        sqlite_repository = SQLiteRepository(str(), sqlite_cursor_spy)
+        sqlite_repository = SQLiteRepository(sqlite_cursor_spy)
 
         result = sql_repository_read_interaction(sqlite_repository).interact({module_symbols})
         assert result.status == PavoCristatusStatus.SUCCESS

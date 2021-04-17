@@ -10,7 +10,7 @@ class SQLiteRepository(object):
     repository for using sql backing db
     """
 
-    def __init__(self, database_path, database_connection):
+    def __init__(self, database_connection):
         self.database_connection = database_connection
         self.cursor = self.database_connection.cursor()
 

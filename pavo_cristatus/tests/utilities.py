@@ -5,7 +5,7 @@ import sys
 
 from pavo_cristatus.project_loader.nested_symbol_collector import collect_nested_symbols
 from pavo_cristatus.python_file import PythonFile
-from pavo_cristatus.utilities import convert_python_file_to_module_qualname, create_data_item_id, is_symbol_callable
+from pavo_cristatus.utilities import convert_python_file_to_module_qualname, is_symbol_callable
 
 
 def get_module_qualname(symbol, project_root_path):
@@ -19,14 +19,14 @@ def get_python_file_from_symbol_object(symbol):
     return PythonFile(split_path[1], split_path[0])
 
 
-def get_nested_argspecs(symbol):
+def get_nested_arg_specs(normalized_symbol):
     arg_specs = {}
     queue = collections.deque()
-    queue.appendleft(symbol)
+    queue.appendleft(normalized_symbol)
     while queue:
         current = queue.pop()
-        if is_symbol_callable(current):
-            arg_specs[current.__qualname__] = inspect.getfullargspec(current)
-        for nested_symbol in collect_nested_symbols(current):
-            queue.appendleft(nested_symbol)
+        if is_symbol_callable(current.symbol):
+                arg_specs[current.qualname] = current.arg_spec
+        for nested_normalized_symbol in collect_nested_symbols(current):
+            queue.appendleft(nested_normalized_symbol)
     return arg_specs
