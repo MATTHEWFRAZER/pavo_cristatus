@@ -12,18 +12,19 @@ from pavo_cristatus.project_loader.utilities import is_non_annotated_symbol_of_i
 from pavo_cristatus.presenters import console_presenter
 from pavo_cristatus.presenters.console_presenter import pavo_cristatus_print
 from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFakeClass
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import \
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callables import \
     ModuleFakeClassWithCallables
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import \
-    ModuleFakeClassWithClassWithNestedAnnotatedFunction
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes_with_nested_annotated_callables import \
+    ModuleFakeClassWithClassesWithNestedAnnotatedCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes import \
     ModuleFakeClassWithClasses
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_method import \
-    ModuleFakeClassWithInheritedAnnotatedMethod
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import ModuleFakeClassWithCallables as AnnotatedModuleFakeClassWithCallables
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_callables import \
+    ModuleFakeClassWithInheritedAnnotatedCallables
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callables import ModuleFakeClassWithCallables as AnnotatedModuleFakeClassWithCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes import ModuleFakeClassWithClasses as AnnotatedModuleFakeClassWithClasses
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_method import ModuleFakeClassWithInheritedAnnotatedMethod as AnnotatedModuleFakeClassWithInheritedAnnotatedMethod
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import ModuleFakeClassWithClassWithNestedAnnotatedFunction as AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_callables import ModuleFakeClassWithInheritedAnnotatedCallables as AnnotatedModuleFakeClassWithInheritedAnnotatedMethod
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes_with_nested_annotated_callables import ModuleFakeClassWithClassesWithNestedAnnotatedCallables\
+    as AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction
 from pavo_cristatus.interactions.annotated_symbol_presenter_interaction.annotated_symbol_presenter_interaction import interact
 from pavo_cristatus.presenters.console_presenter import present_annotated_symbols
 from pavo_cristatus.tests.doubles.verifiers.write_verifier import WriteVerifier
@@ -64,14 +65,14 @@ def print_hook(*args, **kwargs):
                                     get_nested_argspecs(ModuleFakeClassWithClasses.NonSymbolOfInterest),
                                     ModuleFakeClassWithClasses.NonSymbolOfInterest),
                                  (AnnotatedModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest,
-                                    get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest),
-                                    ModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest),
+                                    get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedCallables.SymbolOfInterest),
+                                    ModuleFakeClassWithInheritedAnnotatedCallables.SymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest,
-                                    get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest),
-                                    ModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest),
+                                    get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedCallables.NonSymbolOfInterest),
+                                    ModuleFakeClassWithInheritedAnnotatedCallables.NonSymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest,
-                                    get_nested_argspecs(ModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest),
-                                    ModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest),
+                                    get_nested_argspecs(ModuleFakeClassWithClassesWithNestedAnnotatedCallables.NonSymbolOfInterest),
+                                    ModuleFakeClassWithClassesWithNestedAnnotatedCallables.NonSymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest,
                                     get_nested_argspecs(ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
                                     ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest)

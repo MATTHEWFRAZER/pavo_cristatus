@@ -1,15 +1,29 @@
 import inspect
 import os
 import re
+import itertools
 
 from trochilidae.interoperable_filter import interoperable_filter
 from picidae import access_attribute
 
+from pavo_cristatus.pavo_cristatus_namespace import PavoCristatusNamespace
 from pavo_cristatus.python_file import PythonFile
 
 PYTHON_EXTENSION = ".py"
 
 access_interaction_callable = access_attribute("interact")
+
+def pavo_cristatus_strip_source(source):
+    new_source = ""
+    lines = source.split("\n")
+    found_end_to_decorators = False
+    for line in lines:
+        if is_decorated_line(line):
+            found_end_to_decorators = True
+        if found_end_to_decorators:
+            new_source += line + "\n"
+
+    return new_source.strip()
 
 def create_data_item_id(module_qualname, symbol_qualname):
     return "{0}.{1}".format(module_qualname, symbol_qualname)
@@ -64,23 +78,107 @@ def collect_nested_symbols_in_object_source(symbol):
         # 1. problem is what if we have a version conflict? (virtual env? Can we sandbox things where within the process, we have a separate env)
         # 2. what is an alternative
         try:
-            source = inspect.getsource(nested_code_object).strip()
+            source = pavo_cristatus_get_source(nested_code_object).strip()
         except OSError:
             continue
 
-        nested_symbol = resolve_nested_symbol(source, symbol, nested_code_object)
+        nested_symbol = normalize_nested_symbol(source, symbol, nested_code_object.co_name)
         if nested_symbol is None:
             continue
 
+        nested_symbol.pavo_cristatus_original_source = source
+
         yield nested_symbol
 
-def resolve_nested_symbol(source, symbol, nested_code_object):
+def pavo_cristatus_getsourcefile(symbol):
+    if not hasattr(symbol, "pavo_cristatus_original_source_file"):
+        return inspect.getsource(symbol)
+    else:
+        return symbol.pavo_cristatus_original_source_file
+
+def normalize_nested_symbol(source, symbol, symbol_name):
+    nested_symbol = normalize_symbol(symbol, source, source, symbol_name)
+    if nested_symbol is not None:
+        nested_symbol.pavo_cristatus_original_source = source
+        return nested_symbol
+    else:
+        return None
+
+def normalize_symbol(original_symbol, stripped_source, source, symbol_name):
+    namespace = PavoCristatusNamespace(resolve_symbol_in_namespace, stripped_source)
+    normalized_symbol = normalize_symbol_from_source(stripped_source, namespace, lambda x: x[symbol_name])#get_first(x, symbol_name))
+    if normalized_symbol is not None:
+        normalized_symbol.pavo_cristatus_original_source = source
+        normalized_symbol.__module__ = original_symbol.__module__
+    return normalized_symbol
+
+def get_first(namespace, symbol_name):
+    dropped = itertools.dropwhile(lambda x: get_symbol_name(x) != symbol_name, namespace.values())
+    return next(dropped, None)
+
+def get_symbol_name(symbol):
+    try:
+        return symbol.__name__
+    except Exception:
+        return str()
+
+def resolve_symbol_in_namespace(namespace, symbol_name, symbol, source):
+    # needs to be update otherwise we end up calling __setitem__ which is what this function hooks
+    namespace.update({symbol_name: resolve_correct_symbol(symbol_name, symbol, source)})
+    return not hasattr(namespace[symbol_name], "pavo_cristatus_original_source")
+
+def resolve_correct_symbol(symbol_name, symbol, source=None):
+    try:
+        if symbol_name == symbol.__name__:
+            return symbol
+        elif symbol.__name__ == "<lambda>":
+            if source is None:
+                source = pavo_cristatus_get_source(symbol)
+            return resolve_decorated_symbol(symbol_name, source)
+        else:
+            return None
+    except AttributeError:
+        return None
+
+def resolve_decorated_symbol(name_to_resolve, source):
+    """
+    in the case the symbol was generated through lambda decoration, we need to get retrieve the decorated symbol
+    :name_to_resolve: the name we want the symbol to be bound to
+    :symbol: the lambda decorator
+    :return: lambda decorated function
+    """
+    lines = source.split('\n')
+    modified_source = ""
+    skipped_decorators = False
+    for line in lines:
+        if is_decorated_line(line):
+            skipped_decorators = True
+        if skipped_decorators:
+            modified_source += line
+    namespace = PavoCristatusNamespace(lambda a, b, c, d: True)
+    resolved_symbol = normalize_symbol_from_source(modified_source.strip(), namespace, lambda x: x[name_to_resolve])
+    resolved_symbol.pavo_cristatus_original_source = source
+    return resolved_symbol
+
+def is_decorated_symbol(source):
+    lines = source.split("\n")
+    for line in lines:
+        if line.strip().startswith("@"):
+            return True
+        if is_decorated_line(line):
+            return False
+    else:
+        return False
+
+def is_decorated_line(line):
+    return line.strip().startswith("def") or line.strip().startswith("class")
+
+def normalize_symbol_from_source(source, namespace, access):
     try:
         compiled_source = compile(source, '<string>', 'exec')
     except Exception:
         return None
 
-    namespace = {}
     try:
         # TODO: find out if I can eliminate this security risk. Right now it is what I have for retrieving nested symbols
         exec(compiled_source, namespace)
@@ -88,14 +186,12 @@ def resolve_nested_symbol(source, symbol, nested_code_object):
         return None
 
     try:
-        nested_symbol = namespace[nested_code_object.co_name]
+        nested_symbol = access(namespace)
     except KeyError:
         return None
 
-    nested_symbol.__module__ = symbol.__module__
-    nested_symbol.pavo_cristatus_nested_symbol_source = source
-
     return nested_symbol
+
 
 def is_symbol_callable(symbol):
     return callable(symbol) or is_dereferenceable_function(symbol)
@@ -115,3 +211,9 @@ def write_new_source(module_symbols, get_new_source, *args):
 
 def pavo_cristatus_open(module_symbols_path, mode):
     return open(module_symbols_path, mode)
+
+def pavo_cristatus_get_source(symbol):
+    if not hasattr(symbol, "pavo_cristatus_original_source"):
+        return inspect.getsource(symbol)
+    else:
+        return symbol.pavo_cristatus_original_source

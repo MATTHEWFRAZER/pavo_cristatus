@@ -9,16 +9,16 @@ from trochilidae.interoperable_with_metaclass import interoperable_with_metaclas
 from pavo_cristatus.project_loader import symbol_collector
 from pavo_cristatus.project_loader.utilities import is_non_annotated_symbol_of_interest, is_annotated_symbol_of_interest
 from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFakeClass
-from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_callable import ModuleFakeClassWithCallables
+from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_callables import ModuleFakeClassWithCallables
 from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_classes import ModuleFakeClassWithClasses
-from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_inherited_annotated_method import ModuleFakeClassWithInheritedAnnotatedMethod
-from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_class_with_nested_annotated_function import ModuleFakeClassWithClassWithNestedAnnotatedFunction
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable import ModuleFakeClassWithCallables as AnnotatedModuleFakeClassWithCallables
+from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_class_with_inherited_annotated_callables import ModuleFakeClassWithInheritedAnnotatedCallables
+from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_class_with_nested_annotated_callables import ModuleFakeClassWithClassesWithNestedAnnotatedCallables
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callables import ModuleFakeClassWithCallables as AnnotatedModuleFakeClassWithCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes import ModuleFakeClassWithClasses as AnnotatedModuleFakeClassWithClasses
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_method import ModuleFakeClassWithInheritedAnnotatedMethod as AnnotatedModuleFakeClassWithInheritedAnnotatedMethod
-from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_class_with_nested_annotated_function import ModuleFakeClassWithClassWithNestedAnnotatedFunction as AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_callables import ModuleFakeClassWithInheritedAnnotatedCallables as AnnotatedModuleFakeClassWithInheritedAnnotatedMethod
+from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes_with_nested_annotated_callables import ModuleFakeClassWithClassesWithNestedAnnotatedCallables as AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction
 from pavo_cristatus.tests.utilities import get_module_qualname, get_nested_argspecs
-from pavo_cristatus.utilities import create_data_item_id
+from pavo_cristatus.utilities import create_data_item_id, pavo_cristatus_get_source
 
 unit_test_path = os.path.split(__file__)[0]
 annotated_path = os.path.normpath(os.path.join(unit_test_path, "doubles", "module_fakes", "annotated"))
@@ -57,14 +57,14 @@ class TestNonAnnotatedModuleSymbols:
                                   get_nested_argspecs(ModuleFakeClassWithClasses.NonSymbolOfInterest),
                                   ModuleFakeClassWithClasses.NonSymbolOfInterest),
                                  (AnnotatedModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest,
-                                  get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest),
-                                  ModuleFakeClassWithInheritedAnnotatedMethod.SymbolOfInterest),
+                                  get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedCallables.SymbolOfInterest),
+                                  ModuleFakeClassWithInheritedAnnotatedCallables.SymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest,
-                                 get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest),
-                                 ModuleFakeClassWithInheritedAnnotatedMethod.NonSymbolOfInterest),
+                                 get_nested_argspecs(ModuleFakeClassWithInheritedAnnotatedCallables.NonSymbolOfInterest),
+                                 ModuleFakeClassWithInheritedAnnotatedCallables.NonSymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest,
-                                 get_nested_argspecs(ModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest),
-                                 ModuleFakeClassWithClassWithNestedAnnotatedFunction.NonSymbolOfInterest),
+                                 get_nested_argspecs(ModuleFakeClassWithClassesWithNestedAnnotatedCallables.NonSymbolOfInterest),
+                                 ModuleFakeClassWithClassesWithNestedAnnotatedCallables.NonSymbolOfInterest),
                                 (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest,
                                  get_nested_argspecs(ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
                                  ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
@@ -91,11 +91,11 @@ class TestNonAnnotatedModuleSymbols:
         symbol_object.module = module_qualname
         symbol_object.qualname = symbol.__qualname__
         annotated_source = symbol_object.get_annotated_source(module_annotated_data_items)
-        assert annotated_source == inspect.getsource(annotated_symbol)
+        assert annotated_source == pavo_cristatus_get_source(annotated_symbol)
 
     @pytest.mark.parametrize("symbols", [(ModuleFakeClassWithCallables.symbol_of_interest, AnnotatedModuleFakeClassWithCallables.symbol_of_interest),
                                          (ModuleFakeClassWithClasses.SymbolOfInterest, AnnotatedModuleFakeClassWithClasses.SymbolOfInterest),
-                                         (ModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest, AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest),
+                                         (ModuleFakeClassWithClassesWithNestedAnnotatedCallables.SymbolOfInterest, AnnotatedModuleFakeClassWithClassWithNestedAnnotatedFunction.SymbolOfInterest),
                                          (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest, ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
                                          (ModuleFakeClassWithNonAnnotatedFunctionAndDefault.symbol_of_interest, ModuleFakeClassWithAnnotatedFunctionAndDefault.symbol_of_interest)])
     def test_symbol_object_gives_correct_source_for_non_annotated_symbol(self, symbols):
@@ -116,7 +116,7 @@ class TestNonAnnotatedModuleSymbols:
 
         symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, non_annotated_symbol, is_non_annotated_symbol_of_interest)
         annotated_source = symbol_object.get_annotated_source(module_annotated_data_items)
-        expected_source_lines = inspect.getsource(annotated_symbol).split("\n")
+        expected_source_lines = pavo_cristatus_get_source(annotated_symbol).split("\n")
         annotated_source_lines  = annotated_source.split("\n")
         assert len(annotated_source_lines) == len(expected_source_lines)
         assert self.get_count_of_mismatched_lines(expected_source_lines, annotated_source_lines) == 0

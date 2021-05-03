@@ -15,6 +15,7 @@ def load_modules_into_module_symbol_objects(project_root_path, python_files, is_
     :param is_symbol_of_interest: predicate that determines if a symbol is of interest
     :return: set of ModuleSymbols objects
     """
+
     project_symbols = set()
     for python_file in python_files:
         module_qualname = convert_python_file_to_module_qualname(project_root_path, python_file)

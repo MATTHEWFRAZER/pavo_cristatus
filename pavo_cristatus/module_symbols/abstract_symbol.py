@@ -2,6 +2,8 @@ import inspect
 import re
 
 from pavo_cristatus.module_symbols.regex_patterns import get_class_pattern, get_function_pattern, all_whitespace_pattern
+from pavo_cristatus.utilities import pavo_cristatus_get_source
+
 
 class AbstractSymbol(object):
     """
@@ -11,12 +13,7 @@ class AbstractSymbol(object):
         self.symbol = symbol
         # getsource and accessing __qualname__ or __name__ can can raise an exception
         # get full argspec has a try/except because we need those symbols that are annotated or not
-        try:
-            self.source = inspect.getsource(symbol)
-        except OSError:
-            # we can not use getsource on nested symbols, since we generate the nested symbol, we tack this
-            # attribute on to it and pass it along
-            self.source = symbol.pavo_cristatus_nested_symbol_source
+        self.source = pavo_cristatus_get_source(symbol)
 
         self.qualname = symbol.__qualname__
         self.module = symbol.__module__

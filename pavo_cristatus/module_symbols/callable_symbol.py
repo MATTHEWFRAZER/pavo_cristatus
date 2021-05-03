@@ -10,7 +10,8 @@ from trochilidae.interoperable_reduce import interoperable_reduce
 from pavo_cristatus.constants import DEF_STRING
 from pavo_cristatus.module_symbols.abstract_symbol import AbstractSymbol
 from pavo_cristatus.python_file import PythonFile
-from pavo_cristatus.utilities import convert_python_file_to_module_qualname, create_data_item_id
+from pavo_cristatus.utilities import convert_python_file_to_module_qualname, create_data_item_id, \
+    pavo_cristatus_getsourcefile
 
 __all__ = ["CallableSymbol"]
 
@@ -42,7 +43,7 @@ class CallableSymbol(AbstractSymbol):
         :return: the symbol's source as a string
         """
         if module_qualname is None:
-            package_path, file_name = os.path.split(inspect.getsourcefile(self.symbol))
+            package_path, file_name = os.path.split(pavo_cristatus_getsourcefile(self.symbol))
             python_file = PythonFile(file_name, package_path)
             module_qualname = convert_python_file_to_module_qualname(self.project_root_path, python_file)
         return self.get_source(lambda line: self.get_annotated_signature(line, module_annotated_data_items, module_qualname),

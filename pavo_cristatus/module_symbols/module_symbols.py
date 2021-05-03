@@ -1,9 +1,11 @@
-import inspect
 import os
 
 from picidae import access_attribute
 
 __all__ = ["ModuleSymbols"]
+
+from pavo_cristatus.utilities import pavo_cristatus_get_source
+
 
 class ModuleSymbols(object):
     """
@@ -27,7 +29,7 @@ class ModuleSymbols(object):
         :param args: contextual data for get_source_strategy
         :return: module source as a string
         """
-        source = inspect.getsource(self.module)
+        source = pavo_cristatus_get_source(self.module)
         source_lines = source.split("\n")  # TODO: figure out why os.linesep does not work
         for symbol in self.symbols:
             line_number = symbol.find_line_number_of_symbol_in_source(source)

@@ -1,5 +1,6 @@
 from itertools import chain
 
+from pavo_cristatus.utilities import resolve_correct_symbol
 from pavo_cristatus.utilities import collect_nested_symbols_in_object_source
 
 
@@ -22,6 +23,12 @@ def collect_nested_symbols_in_object_dict(symbol):
     :return: dict values from symbol
     """
     try:
-        return symbol.__dict__.values()
+        for nested_symbol_name, nested_symbol in symbol.__dict__.items():
+            # there is potential in the case of a decorator where the symbol's name does not match its name in the namespace
+            resolved_symbol = resolve_correct_symbol(nested_symbol_name, nested_symbol)
+            if resolved_symbol is not None:
+                resolved_symbol.__module__ = symbol.__module__
+                yield resolved_symbol
     except AttributeError:
         return tuple()
+
