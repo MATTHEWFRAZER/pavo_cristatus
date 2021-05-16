@@ -1,16 +1,13 @@
-import inspect
 import re
-import itertools
-import operator
 import os
 
 from picidae import access_attribute
-from trochilidae.interoperable_reduce import interoperable_reduce
 
 from pavo_cristatus.constants import DEF_STRING
 from pavo_cristatus.module_symbols.abstract_symbol import AbstractSymbol
 from pavo_cristatus.python_file import PythonFile
-from pavo_cristatus.utilities import convert_python_file_to_module_qualname, create_data_item_id
+from pavo_cristatus.utilities import convert_python_file_to_module_qualname, create_data_item_id, pavo_cristatus_split, \
+    is_decorator_line
 
 __all__ = ["CallableSymbol"]
 
@@ -22,9 +19,9 @@ class CallableSymbol(AbstractSymbol):
     represents a callable as a symbol object
     """
 
-    def __init__(self, project_root_path, symbol, nested_symbols):
-        super().__init__(symbol, nested_symbols)
-        self.arg_spec = inspect.getfullargspec(symbol)
+    def __init__(self, project_root_path, normalized_symbol, nested_normalized_symbols):
+        super().__init__(normalized_symbol, nested_normalized_symbols)
+        self.arg_spec = normalized_symbol.arg_spec
         self.project_root_path = project_root_path
 
     def get_non_annotated_source(self):
@@ -42,7 +39,7 @@ class CallableSymbol(AbstractSymbol):
         :return: the symbol's source as a string
         """
         if module_qualname is None:
-            package_path, file_name = os.path.split(inspect.getsourcefile(self.symbol))
+            package_path, file_name = os.path.split(self.normalized_symbol.file)
             python_file = PythonFile(file_name, package_path)
             module_qualname = convert_python_file_to_module_qualname(self.project_root_path, python_file)
         return self.get_source(lambda line: self.get_annotated_signature(line, module_annotated_data_items, module_qualname),
@@ -71,11 +68,9 @@ class CallableSymbol(AbstractSymbol):
         :param args: contextual data required for replacing nested symbols' signatures
         :return: symbol source as a string
         """
-        tabs  = itertools.takewhile(lambda x: x in (" ", "\t"), self.source)
-        tabs  = interoperable_reduce(operator.add, tabs, str())
-        lines = self.source.split("\n")
-        lines = self.replace_signature(lines, get_signature_strategy)
-        lines = self.replace_nested_signatures(lines, tabs, get_source_strategy, *args)
+        lines = pavo_cristatus_split(self.source)
+        lines = self.replace_signature(lines, self.normalized_symbol.indent, get_signature_strategy)
+        lines = self.replace_nested_signatures(lines, get_source_strategy, *args)
         return "\n".join(lines)
 
     def create_new_signature(self, line, signature):
@@ -88,7 +83,7 @@ class CallableSymbol(AbstractSymbol):
         # find "def" string in line
         match = def_pattern.search(line)
         # get the end index of the "def" string
-        prefix_end_index = match.span()[0]
+        prefix_end_index = match.start()
         # get "def" string from line
         prefix = line[:prefix_end_index]
         # find the start of any type hints pattern after the symbol signature
@@ -112,7 +107,6 @@ class CallableSymbol(AbstractSymbol):
         :param arg_spec: used to create an annotated signature
         :return: signature as a string
         """
-
         signature = "{0} {1}(".format(DEF_STRING, self.name)
 
         signature += self.get_annotated_arguments(arg_spec)
@@ -164,19 +158,22 @@ class CallableSymbol(AbstractSymbol):
             return str()
         return arguments[2:]
 
-    def replace_nested_signatures(self, lines, current_tabs, get_source_strategy, *args):
+    def replace_nested_signatures(self, lines, get_source_strategy, *args):
         """
         replace each nested signature with new source
         :param lines: lines of the module that contains the symbol
-        :param current_tabs: keeps track of how far we have to indent
         :param get_source_strategy: the strategy (e.g. get_annotated_source) for getting the symbol's source
         :param args: contextual data for get_source_strategy
         :return: modified lines
         """
-        for symbol in self.nested_symbols:
-            line_number = symbol.find_line_number_of_symbol_in_source(self.source)
-            source = current_tabs + "    " + get_source_strategy(symbol)(*args)
-            for line in source.split("\n"):
+        for normalized_symbol in self.nested_symbols:
+            line_number = normalized_symbol.find_line_number_of_symbol_in_source(self.source)
+
+            if line_number < 0:
+                raise ValueError("source does not contain a line number for {0}".format(normalized_symbol.name))
+
+            source = get_source_strategy(normalized_symbol)(*args)
+            for line in pavo_cristatus_split(source):
                 lines[line_number] = line
                 line_number += 1
         return lines
@@ -213,18 +210,35 @@ class CallableSymbol(AbstractSymbol):
         return signature
 
     @staticmethod
-    def replace_signature(lines, get_signature_strategy):
+    def replace_signature(lines, indent, get_signature_strategy):
         """
         replace signatures of each "def"
         :param lines: lines of the module that contains the symbol
         :param get_signature_strategy: the strategy (e.g. get_annotated_signature) for getting the symbol's signature
         :return: modified lines
         """
+        # i = 0
+        # while i < len(lines):
+        #     line = lines[i]
+        #     # we have to skip over decorators as they appear in source lines of callable
+        #     if line.strip().startswith(DEF_STRING):
+        #         lines[i] = indent + get_signature_strategy(line)
+        #         break
+        #     else:
+        #         i += 1
+        # return lines
         i = 0
+        # TODO: HACK ALERT, figure out why the indent differs for decorated lines
+        encountered_decorated_line = False
         while i < len(lines):
             line = lines[i]
+            if is_decorator_line(line):
+                encountered_decorated_line = True
             # we have to skip over decorators as they appear in source lines of callable
-            if line.strip().startswith(DEF_STRING):
+            if not encountered_decorated_line and line.strip().startswith(DEF_STRING):
+                lines[i] = indent + get_signature_strategy(line)
+                break
+            elif encountered_decorated_line and line.strip().startswith(DEF_STRING):
                 lines[i] = get_signature_strategy(line)
                 break
             else:

@@ -31,10 +31,10 @@ jobs:
         run: |
           pip install --upgrade setuptools
           pip install -r requirements.txt
-          pip install tox
+          pip install pytest hypothesis
 
-      - name: run tox
-        run: tox
+      - name: run pytest
+        run: pytest pavo_cristatus/tests
       
       - name: tag commit based off of version
         run: |

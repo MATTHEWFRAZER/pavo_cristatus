@@ -28,7 +28,7 @@ class ModuleVerifier(object):
         project_symbols = project_loader.load_annotated_project(str())
 
         assert len(project_symbols) == len(self.symbols_of_interest)
-        module_symbols = next(iter(project_symbols)).symbols.get(self.stub_module.__name__, tuple())
+        module_symbols = next(iter(project_symbols)).normalized_symbols.get(self.stub_module.__name__, tuple())
         python_symbols = {x.symbol for x in module_symbols}
 
         if self.symbols_of_interest:
