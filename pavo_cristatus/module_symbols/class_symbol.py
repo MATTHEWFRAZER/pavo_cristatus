@@ -4,6 +4,9 @@ from picidae import access_attribute
 
 __all__ = ["ClassSymbol"]
 
+from pavo_cristatus.utilities import pavo_cristatus_split, is_decorator_line
+
+
 class ClassSymbol(AbstractSymbol):
     """
     represents a class as a symbol object
@@ -16,15 +19,24 @@ class ClassSymbol(AbstractSymbol):
         :param args: contextual data for get_source_strategy
         :return: the symbol's source as a string
         """
-        lines = self.source.split("\n")
-        for symbol in self.nested_symbols:
-            line_number = symbol.find_line_number_of_symbol_in_source(self.source)
+        lines = pavo_cristatus_split(self.source)
+
+        line_number = self.normalized_symbol.find_line_number_of_symbol_in_source(self.source)
+        if line_number < 0:
+            raise ValueError("source does not contain a line number for {0}".format(self.name))
+
+        # TODO: HACK ALERT, root cause this
+        if not is_decorator_line(lines[0]):
+            lines[line_number] = self.normalized_symbol.indent + lines[line_number]
+
+        for symbol_object in self.nested_symbols:
+            line_number = symbol_object.find_line_number_of_symbol_in_source(self.source)
 
             if line_number < 0:
-                raise ValueError("source dos not contain a line number for {0}".format(symbol))
+                raise ValueError("source does not contain a line number for {0}".format(symbol_object.name))
 
-            current_source = get_source_strategy(symbol)(*args)
-            for line in current_source.split("\n"):
+            current_source = get_source_strategy(symbol_object)(*args).rstrip()
+            for line in pavo_cristatus_split(current_source):
                 lines[line_number] = line
                 line_number += 1
         return "\n".join(lines)

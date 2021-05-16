@@ -2,9 +2,9 @@ from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFa
 
 from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
 
-__all__ = ["ModuleFakeClassWithNestedAnnotatedFunction"]
+__all__ = ["ModuleFakeClassWithNestedAnnotatedCallables"]
 
-class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithNestedAnnotatedCallables(interoperable_with_metaclass_future(ModuleFakeClass)):
     def symbol_of_interest(self, a, b): pass
 
     def non_symbol_of_interest(self, a : int, b : str) -> bool:

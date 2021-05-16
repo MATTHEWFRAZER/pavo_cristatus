@@ -19,10 +19,10 @@ class RepositoryInteraction(object):
         """
         accumulator = self.get_accumulator()
         for module_symbols in project_symbols:
-            for symbol in module_symbols.symbols:
-                if not self.operation(module_symbols, symbol, self.repository, accumulator):
+            for symbol_object in module_symbols.symbol_objects:
+                if not self.operation(module_symbols, symbol_object, self.repository, accumulator):
                     return PavoCristatusResult(project_symbols, PavoCristatusStatus.FAILURE, "failed with operation {0}".format(self.operation))
-                for nested_symbol in symbol.nested_symbols:
+                for nested_symbol in symbol_object.nested_symbols:
                     if not self.operation(module_symbols, nested_symbol, self.repository, accumulator):
                         return PavoCristatusResult(project_symbols, PavoCristatusStatus.FAILURE,
                                                    "failed with operation {0}".format(self.operation))

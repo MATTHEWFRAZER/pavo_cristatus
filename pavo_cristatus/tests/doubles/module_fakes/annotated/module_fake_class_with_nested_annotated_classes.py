@@ -2,10 +2,11 @@ from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFa
 
 from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
 
-__all__ = ["ModuleFakeClassWithNestedAnnotatedFunction"]
+__all__ = ["ModuleFakeClassWithNestedAnnotatedClasses"]
 
-class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithNestedAnnotatedClasses(interoperable_with_metaclass_future(ModuleFakeClass)):
     def symbol_of_interest(self, a, b):
-        def nested(a : int, b : str) -> bool: pass
+        class SymbolOfInterest:
+            def symbol_of_interest(self, a: int, b: str) -> bool: pass
 
     def non_symbol_of_interest(self, a, b): pass
