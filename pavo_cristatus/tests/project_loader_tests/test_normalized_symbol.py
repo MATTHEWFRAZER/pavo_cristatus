@@ -5,8 +5,10 @@ import sys
 import pytest
 
 from pavo_cristatus.project_loader import symbol_collector
+from pavo_cristatus.project_loader.normalized_module_symbol import NormalizedModuleSymbol
 from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
 from pavo_cristatus.project_loader.utilities import is_non_annotated_symbol_of_interest
+from pavo_cristatus.utilities import pavo_cristatus_get_source
 
 unit_test_path = os.path.split(__file__)[0]
 project_root_path = os.path.normpath(os.path.join(unit_test_path, "..", "..")).replace("\\", "\\\\")
@@ -79,6 +81,12 @@ def test_normalized_symbol_raises_exception_if_normalized_parent_is_provided_wit
         pass
     else:
         pytest.fail("Value Error was expected")
+
+def zero_indent_symbol(x : str) -> None: pass
+
+def test_zero_indent_symbol_gets_original_source_correctly():
+    normalized_symbol = NormalizedSymbol(zero_indent_symbol, NormalizedModuleSymbol(sys.modules[__name__]), zero_indent_symbol.__name__)
+    assert normalized_symbol.original_source == pavo_cristatus_get_source(zero_indent_symbol)
 
 # TODO: single line symbol raises error
 

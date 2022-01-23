@@ -17,6 +17,7 @@ from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_inherited_annotated_callables import ModuleFakeClassWithInheritedAnnotatedCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_classes_with_nested_annotated_callables import ModuleFakeClassWithClassesWithNestedAnnotatedCallables
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_nested_annotated_callables import ModuleFakeClassWithNestedAnnotatedCallables
+from pavo_cristatus.tests.doubles.callable_with_multiple_lines_annotated import all_callables
 from pavo_cristatus.utilities import pavo_cristatus_get_source, pavo_cristatus_split
 
 unit_test_path = os.path.split(__file__)[0]
@@ -76,6 +77,7 @@ class TestAnnotatedModuleSymbols:
         non_annotated_source = symbol_object.get_non_annotated_source()
         assert non_annotated_source == pavo_cristatus_get_source(symbol)
 
+
     @pytest.mark.parametrize("symbol", symbols_under_test_2)
     def test_symbol_object_gives_correct_source_annotated_symbol(self, symbol):
         symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, NormalizedSymbol(symbol, None, None), is_annotated_symbol_of_interest)
@@ -95,6 +97,14 @@ class TestAnnotatedModuleSymbols:
         non_annotated_source_lines = pavo_cristatus_split(non_annotated_source)
         assert len(non_annotated_source_lines) == len(annotated_source_lines)
         assert self.get_count_of_mismatched_lines(annotated_source_lines, non_annotated_source_lines) == 2
+
+    @pytest.mark.parametrize("symbol,expected_source_postfix", all_callables)
+    def test_symbol_object_gives_correct_source_with_multiple_lines(self, symbol, expected_source_postfix):
+        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path,
+                                                                  NormalizedSymbol(symbol, None, None),
+                                                                  is_annotated_symbol_of_interest)
+        non_annotated_source = symbol_object.get_non_annotated_source()
+        assert non_annotated_source.strip() == "def {0}{1}".format(symbol.__name__, expected_source_postfix)
 
     @staticmethod
     def get_count_of_mismatched_lines(expected_source_lines, non_annotated_source_lines):

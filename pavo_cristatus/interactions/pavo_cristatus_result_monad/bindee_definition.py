@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 class BindeeDefinition(object):
     def __init__(self, bindee_function, in_parameter_predicate, out_parameter_predicate):
         """
