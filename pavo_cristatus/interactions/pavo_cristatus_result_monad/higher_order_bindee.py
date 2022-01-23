@@ -1,3 +1,5 @@
+from typing import Any
+
 from pavo_cristatus.interactions.pavo_cristatus_result_monad.pavo_cristatus_null_result import PavoCristatusNullResult
 from pavo_cristatus.interactions.pavo_cristatus_result_monad.pavo_cristatus_result_monad import PavoCristatusResultMonad
 from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatus

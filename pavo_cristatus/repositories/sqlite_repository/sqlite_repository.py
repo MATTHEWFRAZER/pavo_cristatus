@@ -1,5 +1,5 @@
 import logging
-import os
+from typing import Any, Optional
 
 from pavo_cristatus.repositories.data_item import DataItem
 

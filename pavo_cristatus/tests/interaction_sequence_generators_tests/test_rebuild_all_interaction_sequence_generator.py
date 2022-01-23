@@ -8,6 +8,7 @@ from trochilidae.interoperable_map import interoperable_map
 
 from pavo_cristatus.dependency_injection.ploceidae_configurator import pavo_cristatus_dependency_wrapper, \
     pavo_cristatus_container
+from pavo_cristatus.directory_walk_configuration import DirectoryWalkConfiguration
 from pavo_cristatus.interaction_sequence_generators.rebuild_all_interaction_sequence_generator import rebuild_all_interaction_sequence_generator
 from pavo_cristatus.interactions.pavo_cristatus_result_monad.higher_order_bindee import HigherOrderBindee
 from pavo_cristatus.interactions.pavo_cristatus_result_monad.pavo_cristatus_result_monad import PavoCristatusResultMonad
@@ -29,7 +30,7 @@ def test_display_all_interaction_sequence_generator():
     pavo_cristatus_dependency_wrapper(visibility="module", resolvable_name="database_path")(lambda: project_root_path)
     pavo_cristatus_dependency_wrapper()(database_connection)
 
-    initial_argument = project_root_path
+    initial_argument = DirectoryWalkConfiguration(project_root_path, [])
     generator = pavo_cristatus_container.wire_dependencies(rebuild_all_interaction_sequence_generator)
 
     try:

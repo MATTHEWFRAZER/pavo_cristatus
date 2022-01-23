@@ -1,3 +1,5 @@
+from typing import Callable, Any
+
 __all__ = ["PavoCristatusNamespace"]
 
 # our primary problem is that a decorator can intercept and reset the decorated

@@ -1,9 +1,11 @@
 import os
+from typing import Callable, Any
 
 from picidae import access_attribute
 
 __all__ = ["ModuleSymbols"]
 
+from pavo_cristatus.python_file import PythonFile
 from pavo_cristatus.utilities import pavo_cristatus_get_source, pavo_cristatus_split
 
 
@@ -18,7 +20,7 @@ class ModuleSymbols(object):
         self.symbol_objects = symbol_objects
 
     @property
-    def path(self):
+    def path(self) -> str:
         """get the full path of the module"""
         return os.path.join(self.python_file.package_path, self.python_file.file_name)
 

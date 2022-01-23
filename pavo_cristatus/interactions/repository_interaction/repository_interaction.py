@@ -1,3 +1,5 @@
+from typing import Callable, Any
+
 from pavo_cristatus.interactions.pavo_cristatus_result import PavoCristatusResult
 from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatus
 

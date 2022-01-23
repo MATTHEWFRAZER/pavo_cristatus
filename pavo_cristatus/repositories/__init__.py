@@ -6,7 +6,7 @@ from pavo_cristatus.dependency_injection.ploceidae_configurator import pavo_cris
 
 __all__ = ["SQLiteRepository"]
 
-def database_connection(database_path):
+def database_connection(database_path : str) -> sqlite3.Connection:
     return sqlite3.connect(database_path)
 
 pavo_cristatus_dependency_wrapper()(database_connection)
