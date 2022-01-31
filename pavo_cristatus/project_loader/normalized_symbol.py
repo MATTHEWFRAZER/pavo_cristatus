@@ -1,10 +1,13 @@
 import inspect
+from inspect import FullArgSpec
 import itertools
 import re
+import typing
+from typing import Any, Pattern, AnyStr, Match, Optional
 
 import more_itertools
 
-from pavo_cristatus.constants import LAMBDA_STRING
+from pavo_cristatus.constants import LAMBDA_STRING, DEF_STRING, CLASS_STRING
 from pavo_cristatus.module_symbols.regex_patterns import get_class_pattern, get_function_pattern
 from pavo_cristatus.pavo_cristatus_namespace import PavoCristatusNamespace
 from pavo_cristatus.utilities import pavo_cristatus_split, is_decorator_line
@@ -19,7 +22,7 @@ class NormalizedSymbol(object):
         self.normalized_source = self.get_normalized_source(self.original_source)
         self._name = self.get_name(self.original_symbol, self.normalized_source, normalized_child_name)
 
-        if symbol is not None and self.original_symbol.__name__ == self._name:
+        if symbol is not None and hasattr(self.original_symbol, "__name__") and self.original_symbol.__name__ == self._name:
             self._symbol = self.original_symbol
         else:
             self._symbol = self.normalize_symbol(self.normalized_source, self._name)
@@ -31,45 +34,45 @@ class NormalizedSymbol(object):
         self._module = self.get_module(symbol, normalized_parent_symbol)
 
     @classmethod
-    def from_context_with_no_symbol(cls, normalized_parent_symbol, normalized_child_name):
+    def from_context_with_no_symbol(cls, normalized_parent_symbol : 'NormalizedSymbol', normalized_child_name : str) -> Any:
         instance = cls(None, normalized_parent_symbol, normalized_child_name)
         instance.original_symbol = instance.symbol
         instance.original_source = instance.normalized_source
         return instance
 
     @property
-    def file(self):
+    def file(self) -> str:
         return self._file
 
     @property
-    def module(self):
+    def module(self) -> str:
         return self._module
 
     @property
-    def source(self):
+    def source(self) -> str:
         if not is_decorator_line(self.original_source):
             return self.original_source
         else:
             return self.indent + self.original_source
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def symbol(self):
+    def symbol(self) -> Any:
         return self._symbol
 
     @property
-    def qualname(self):
+    def qualname(self) -> str:
         return self._qualname
 
     @property
-    def arg_spec(self):
+    def arg_spec(self) -> Optional[FullArgSpec]:
         return self._arg_spec
 
     @property
-    def indent(self):
+    def indent(self) -> str:
         return self._indent
 
     def get_file(self, normalized_parent_symbol):
@@ -78,21 +81,27 @@ class NormalizedSymbol(object):
         else:
             return inspect.getsourcefile(self.original_symbol)
 
-    def get_arg_spec(cls, symbol):
+    @classmethod
+    def get_arg_spec(cls, symbol : Any) -> Optional[FullArgSpec]:
         try:
-            return inspect.getfullargspec(symbol)
+            arg_spec = inspect.getfullargspec(symbol)
+            for key, value in arg_spec.annotations.items():
+                # we are dealing with a forward reference, and need to handle it accordingly
+                if type(value) is str:
+                    arg_spec.annotations[key] = "\'" + value + "\'"
+            return arg_spec
         except Exception:
             return None
 
     @classmethod
-    def get_module(cls, symbol, normalized_parent_symbol):
+    def get_module(cls, symbol : Any, normalized_parent_symbol : 'NormalizedSymbol') -> str:
         if normalized_parent_symbol is not None:
             return normalized_parent_symbol.module
         else:
             return symbol.__module__
 
     @classmethod
-    def get_qualname(cls, name, symbol, normalized_parent_symbol):
+    def get_qualname(cls, name : str, symbol : Any, normalized_parent_symbol : 'NormalizedSymbol') -> str:
         try:
             return symbol.__qualname__
         except AttributeError:
@@ -102,7 +111,7 @@ class NormalizedSymbol(object):
             return ".".join((normalized_parent_symbol.qualname, name))
 
     @classmethod
-    def normalize_symbol(cls, normalized_source, normalized_child_name):
+    def normalize_symbol(cls, normalized_source : str, normalized_child_name : str) -> Any:
         namespace = PavoCristatusNamespace(lambda x, y: True)
 
         normalized_source = normalized_source.strip()
@@ -125,7 +134,7 @@ class NormalizedSymbol(object):
         return nested_symbol
 
     @classmethod
-    def get_normalized_source(cls, original_source):
+    def get_normalized_source(cls, original_source : str) -> str:
         normalized_source = ""
         lines = pavo_cristatus_split(original_source)
         for line in lines:
@@ -134,7 +143,7 @@ class NormalizedSymbol(object):
         return normalized_source.strip() + "\n"
 
     @classmethod
-    def get_original_source(cls, symbol, normalized_parent_symbol, normalized_child_name):
+    def get_original_source(cls, symbol : Any, normalized_parent_symbol : 'NormalizedSymbol', normalized_child_name : str) -> str:
         if normalized_parent_symbol is not None:
             if normalized_child_name is None:
                 raise ValueError("normalized parent must provide child to normalize with its name")
@@ -239,7 +248,7 @@ class NormalizedSymbol(object):
             return -1
 
     @classmethod
-    def resolve_source_with_conflicts_in_parent_source(cls, normalized_parent_source, class_pattern, function_pattern):
+    def resolve_source_with_conflicts_in_parent_source(cls, normalized_parent_source : str, class_pattern : Pattern[AnyStr], function_pattern : Pattern[AnyStr]) -> str:
         lines = pavo_cristatus_split(normalized_parent_source)
         if len(lines) < 2:
             raise ValueError("symbol source is only one line, can not resolve pattern match conflicts")
@@ -274,7 +283,7 @@ class NormalizedSymbol(object):
         return resolved_source
 
     @classmethod
-    def resolve_source_from_match(cls, normalized_parent_source, pattern_match, child_symbol_pattern):
+    def resolve_source_from_match(cls, normalized_parent_source : str, pattern_match : Match[AnyStr], child_symbol_pattern : Pattern[AnyStr]) -> str:
         it = iter(normalized_parent_source)
         more_itertools.consume(it, pattern_match.start())
         modified_parent_source = "".join(it)
@@ -284,19 +293,27 @@ class NormalizedSymbol(object):
         resolved_source = ""
         expected_indent_level = cls.find_symbol_indent_in_parent_symbol_source(normalized_parent_source,
                                                                                child_symbol_pattern)
-        for line in lines:
-            if cls.get_indentation_level(line) < expected_indent_level:
-                break
-            resolved_source += line + "\n"
+
+        if expected_indent_level > 0:
+            for i, line in enumerate(lines):
+                if i > 0 and cls.get_indentation_level(line) < expected_indent_level and line.strip():
+                    break
+                resolved_source += line + "\n"
+        else:
+            for i, line in enumerate(lines):
+                if i > 0 and cls.get_indentation_level(line) == expected_indent_level and line.strip():
+                    break
+                resolved_source += line + "\n"
+
         return resolved_source
 
     @classmethod
-    def get_indentation_level(cls, line):
+    def get_indentation_level(cls, line : str) -> int:
         return len(line) - len(line.strip())
 
     @classmethod
-    def get_name(cls, original_symbol, source, normalized_child_name):
-        if original_symbol is not None and original_symbol.__name__ != LAMBDA_STRING:
+    def get_name(cls, original_symbol : Any, source : str, normalized_child_name : Optional[str]) -> str:
+        if original_symbol is not None and hasattr(original_symbol, "__name__") and original_symbol.__name__ != LAMBDA_STRING:
             return original_symbol.__name__
         elif normalized_child_name is not None:
             return normalized_child_name
@@ -310,11 +327,11 @@ class NormalizedSymbol(object):
                 raise ValueError("symbol {0} does not have resolvable name".format(original_symbol))
 
     @classmethod
-    def is_decorated_line(cls, line):
-        return line.strip().startswith("def") or line.strip().startswith("class")
+    def is_decorated_line(cls, line : str) -> bool:
+        return line.strip().startswith(DEF_STRING) or line.strip().startswith(CLASS_STRING)
 
     @classmethod
-    def find_symbol_indent_in_parent_symbol_source(cls, parent_source, child_symbol_pattern):
+    def find_symbol_indent_in_parent_symbol_source(cls, parent_source : str, child_symbol_pattern : Pattern[AnyStr]) -> int:
         """
         given a parent source and a child symbol pattern to match, we find the indentation for the child symbol
         we will use the result of this function to find the end of a child symbol's source inside of the parent's source
@@ -335,17 +352,17 @@ class NormalizedSymbol(object):
             raise ValueError("source does not contain callable or class definitions")
 
         child_indent = cls.get_indentation_level(matched_line)
-        return parent_indent - child_indent
+        return child_indent - parent_indent
 
     @classmethod
-    def find_symbol_indent_in_source(cls, symbol, normalized_parent_symbol, name):
+    def find_symbol_indent_in_source(cls, symbol : Any, normalized_parent_symbol : 'NormalizedSymbol', name : str) -> str:
         if normalized_parent_symbol is not None:
             return cls.find_symbol_indent_in_source_inner(normalized_parent_symbol.source, name)
         else:
             return cls.find_symbol_indent_in_source_inner(inspect.getsource(symbol), name)
 
-    @classmethod
-    def find_symbol_indent_in_source_inner(cls, source, name):
+    @staticmethod
+    def find_symbol_indent_in_source_inner(source : str, name : str) -> str:
         class_pattern = get_class_pattern(name)
         function_pattern = get_function_pattern(name)
         if re.search(class_pattern, source):

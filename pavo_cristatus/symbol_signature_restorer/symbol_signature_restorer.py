@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from picidae import access_attribute
 
 from pavo_cristatus.utilities import write_new_source

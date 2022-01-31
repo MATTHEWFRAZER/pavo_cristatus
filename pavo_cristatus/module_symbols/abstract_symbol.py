@@ -1,5 +1,6 @@
 import inspect
 import re
+from typing import Any, List
 
 from pavo_cristatus.module_symbols.regex_patterns import get_class_pattern, get_function_pattern
 from pavo_cristatus.utilities import pavo_cristatus_get_source, pavo_cristatus_split

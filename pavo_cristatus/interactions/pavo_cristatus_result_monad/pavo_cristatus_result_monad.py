@@ -1,3 +1,5 @@
+from typing import Callable, Any
+
 from pymonad import Monad
 
 __all__ = ["PavoCristatusResultMonad"]

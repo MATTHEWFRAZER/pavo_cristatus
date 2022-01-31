@@ -1,5 +1,9 @@
 __all__ = ["present_annotated_symbols"]
 
+from collections import defaultdict
+from typing import Any
+
+
 def present_annotated_symbols(project_symbols_annotated_data_items):
     """
     print out project symbols to display annotated source

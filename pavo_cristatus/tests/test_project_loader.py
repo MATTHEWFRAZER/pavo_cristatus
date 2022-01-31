@@ -36,7 +36,7 @@ class TestProjectLoader:
         project_loader_stub = expand_parameter_list_by_x(lazily_echo(ModuleFakeClassWithCallables), 1)
         monkey_patcher(project_loader_stub, lazily_echo(list()))
 
-        project_symbols = project_loader.load_annotated_project(str())
+        project_symbols = project_loader.load_annotated_project(str(), [])
 
         assert len(project_symbols) == 0
 
@@ -60,7 +60,7 @@ class TestProjectLoader:
         project_loader_stub = lazily_echo(ModuleFakeClassWithInheritedAnnotatedCallables)
         monkey_patcher(project_loader_stub, lazily_echo([PythonFile(str(), str())]))
 
-        project_symbols = project_loader.load_annotated_project(str())
+        project_symbols = project_loader.load_annotated_project(str(), [])
 
         # this should be expected. If a base class defines a method, that method should get picked up when that base
         # class is picked up

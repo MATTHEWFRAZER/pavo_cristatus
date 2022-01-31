@@ -11,9 +11,9 @@ class DataItem(object):
         self._data = data
 
     @property
-    def data(self):
+    def data(self) -> str:
         return decompress(self._data)
 
     @data.setter
-    def data(self ,value):
+    def data(self ,value : str) -> None:
         _data = compress(value)

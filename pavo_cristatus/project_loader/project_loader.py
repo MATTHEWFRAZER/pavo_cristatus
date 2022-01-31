@@ -1,7 +1,9 @@
 import importlib
+from typing import Generator, Callable, List
 
 from pavo_cristatus.project_loader.utilities import is_annotated_symbol_of_interest, is_non_annotated_symbol_of_interest
 from pavo_cristatus.project_loader import symbol_collector
+from pavo_cristatus.python_file import PythonFile
 from pavo_cristatus.utilities import collect_python_files_under_project_root, convert_python_file_to_module_qualname
 from pavo_cristatus.module_symbols.module_symbols import ModuleSymbols
 
@@ -32,22 +34,24 @@ def load_modules_into_module_symbol_objects(project_root_path, python_files, is_
         project_symbols.add(module_symbols)
     return project_symbols
 
-def load_annotated_project(project_root_path):
+def load_annotated_project(project_root_path, directories_to_ignore):
     """
     loads annotated symbols into a set of ModuleSymbols
     :param project_root_path: symbols we will use to write out new source code
+    :param directories_to_ignore: directories to ignore on our directory walk
     :return: set of ModuleSymbols objects
     """
     return load_modules_into_module_symbol_objects(project_root_path,
-                                                   collect_python_files_under_project_root(project_root_path),
+                                                   collect_python_files_under_project_root(project_root_path, directories_to_ignore),
                                                    is_annotated_symbol_of_interest)
 
-def load_non_annotated_project(project_root_path):
+def load_non_annotated_project(project_root_path, directories_to_ignore):
     """
     loads non annotated symbols into a set of ModuleSymbols
     :param project_root_path: symbols we will use to write out new source code
+    :param directories_to_ignore: directories to ignore on our directory walk
     :return: set of ModuleSymbols objects
     """
     return load_modules_into_module_symbol_objects(project_root_path,
-                                                   collect_python_files_under_project_root(project_root_path),
+                                                   collect_python_files_under_project_root(project_root_path, directories_to_ignore),
                                                    is_non_annotated_symbol_of_interest)

@@ -1,8 +1,10 @@
 from itertools import chain
+from typing import Generator, Iterator, Union
 
 from trochilidae.interoperable_filter import interoperable_filter
 
 from pavo_cristatus.constants import LAMBDA_STRING
+from pavo_cristatus.project_loader.normalized_module_symbol import NormalizedModuleSymbol
 from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
 
 
@@ -25,6 +27,14 @@ def collect_nested_symbols_in_object_dict(normalized_symbol):
     :return: generator of NormalizedSymbol
     """
     for nested_symbol_name, nested_symbol in normalized_symbol.symbol.__dict__.items():
+        # TODO: handle properties
+        if type(nested_symbol) == property:
+            continue
+
+        # TODO: handle static methods
+        if type(nested_symbol) == staticmethod:
+            continue
+
         if nested_symbol is None:
             continue
         # there is potential in the case of a decorator where the symbol's name does not match its name in the namespace

@@ -1,6 +1,7 @@
 import logging
 import pickle
 import base64
+from typing import Any, Callable
 
 from pavo_cristatus.repositories.data_item import DataItem
 from pavo_cristatus.utilities import create_data_item_id
