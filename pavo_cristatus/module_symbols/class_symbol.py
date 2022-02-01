@@ -1,3 +1,5 @@
+from typing import Any, Callable
+
 from pavo_cristatus.module_symbols.abstract_symbol import AbstractSymbol
 
 from picidae import access_attribute

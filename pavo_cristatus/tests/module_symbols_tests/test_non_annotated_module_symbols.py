@@ -22,6 +22,9 @@ from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_
 from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_callable_and_default import ModuleFakeClassWithCallableAndDefault \
     as AnnotatedModuleFakeClassWithCallableAndDefault
 from pavo_cristatus.tests.doubles.module_fakes.non_annotated.module_fake_class_with_callable_and_default import ModuleFakeClassWithCallableAndDefault
+from pavo_cristatus.tests.doubles.special_argument_callables_annotated import all_callables as all_callables_annotated
+from pavo_cristatus.tests.doubles.special_argument_callables_non_annotated import all_callables as all_callables_non_annotated
+
 from pavo_cristatus.tests.utilities import get_module_qualname, get_nested_arg_specs
 from pavo_cristatus.utilities import create_data_item_id, pavo_cristatus_get_source, pavo_cristatus_split
 
@@ -80,6 +83,13 @@ symbols_under_test_2 = [(ModuleFakeClassWithCallables.symbol_of_interest, Annota
                          (AnnotatedModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest, ModuleFakeClassWithNestedAnnotatedFunction.symbol_of_interest),
                          (ModuleFakeClassWithCallableAndDefault.symbol_of_interest, ModuleFakeClassWithCallableAndDefault.symbol_of_interest)
                          ]
+
+if sys.version_info >= (3, 6):
+    from pavo_cristatus.tests.doubles.special_argument_callables_annotated import all_callables as all_callables_annotated
+    from pavo_cristatus.tests.doubles.special_argument_callables_non_annotated import all_callables as all_callables_non_annotated
+else:
+    all_callables_annotated = []
+    all_callables_non_annotated = []
 
 # these are only supported by python 3.9 (all of the following symbols will cause syntax errors)
 if sys.version_info >= (3, 9):
@@ -168,10 +178,19 @@ class TestNonAnnotatedModuleSymbols:
     @pytest.mark.parametrize("symbols", symbols_under_test_2)
     def test_symbol_object_gives_correct_source_for_non_annotated_symbol(self, symbols):
         non_annotated_symbol, annotated_symbol = symbols
+        self.verify_symbol_gives_correct_source_for_non_annotated_symbol(non_annotated_symbol, annotated_symbol)
+
+    @pytest.mark.parametrize("non_annotated_symbol,annotated_symbol", zip(all_callables_non_annotated, all_callables_annotated))
+    def test_symbol_object_gives_correct_source_for_non_annotated_symbol_for_special_callables(self, non_annotated_symbol, annotated_symbol):
+        self.verify_symbol_gives_correct_source_for_non_annotated_symbol(non_annotated_symbol, annotated_symbol)
+
+    def verify_symbol_gives_correct_source_for_non_annotated_symbol(self, non_annotated_symbol, annotated_symbol):
         non_annotated_normalized_symbol = NormalizedSymbol(non_annotated_symbol, None, None)
         annotated_normalized_symbol = NormalizedSymbol(annotated_symbol, None, None)
         module_qualname = get_module_qualname(non_annotated_symbol, project_root_path)
-        module_annotated_data_items = {create_data_item_id(module_qualname, non_annotated_normalized_symbol.qualname): inspect.getfullargspec(annotated_normalized_symbol.symbol)}
+        module_annotated_data_items = {
+            create_data_item_id(module_qualname, non_annotated_normalized_symbol.qualname): inspect.getfullargspec(
+                annotated_normalized_symbol.symbol)}
 
         queue = collections.deque()
         queue.appendleft(annotated_normalized_symbol)
@@ -181,13 +200,15 @@ class TestNonAnnotatedModuleSymbols:
                                                                            current,
                                                                            is_annotated_symbol_of_interest).nested_symbols:
                 queue.appendleft(nested_symbol.normalized_symbol)
-                module_annotated_data_items[create_data_item_id(module_qualname, nested_symbol.qualname)] = inspect.getfullargspec(nested_symbol.normalized_symbol.symbol)
+                module_annotated_data_items[
+                    create_data_item_id(module_qualname, nested_symbol.qualname)] = inspect.getfullargspec(
+                    nested_symbol.normalized_symbol.symbol)
 
-
-        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, non_annotated_normalized_symbol, is_non_annotated_symbol_of_interest)
+        symbol_object = symbol_collector.convert_to_symbol_object(project_root_path, non_annotated_normalized_symbol,
+                                                                  is_non_annotated_symbol_of_interest)
         annotated_source = symbol_object.get_annotated_source(module_annotated_data_items)
         expected_source_lines = pavo_cristatus_split(pavo_cristatus_get_source(annotated_symbol))
-        annotated_source_lines  = pavo_cristatus_split(annotated_source)
+        annotated_source_lines = pavo_cristatus_split(annotated_source)
 
         assert len(annotated_source_lines) == len(expected_source_lines)
         assert self.get_count_of_mismatched_lines(expected_source_lines, annotated_source_lines) == 0

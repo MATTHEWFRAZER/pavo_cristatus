@@ -1,7 +1,9 @@
 import collections
 import inspect
+from typing import Callable, Any
 
 from pavo_cristatus.project_loader.nested_symbol_collector import collect_nested_symbols
+from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
 from pavo_cristatus.utilities import is_symbol_callable
 
 

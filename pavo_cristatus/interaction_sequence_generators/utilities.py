@@ -1,3 +1,6 @@
+from typing import Callable, Any
+
+
 def get_type_check(expected_type):
     """
     Any -> (Any -> bool)

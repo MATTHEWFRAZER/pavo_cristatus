@@ -1,10 +1,16 @@
 import collections
 import sys
+from typing import Callable, Any
 
 from pavo_cristatus.module_symbols import symbol_creator
+from pavo_cristatus.module_symbols.abstract_symbol import AbstractSymbol
 from pavo_cristatus.project_loader.nested_symbol_collector import collect_nested_symbols
 
 __all__ = ["collect"]
+
+from pavo_cristatus.project_loader.normalized_module_symbol import NormalizedModuleSymbol
+from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
+
 
 def convert_to_symbol_object(project_root_path, normalized_symbol, is_symbol_of_interest):
     """
@@ -35,7 +41,7 @@ def collect(project_root_path, module, is_symbol_of_interest):
     :return: set of symbols of interest
     """
     filtered_symbols = set()
-    for normalized_symbol in collect_nested_symbols(module):
+    for normalized_symbol in collect_nested_symbols(NormalizedModuleSymbol(module)):
         if is_symbol_of_interest(module, normalized_symbol):
             filtered_symbols.add(convert_to_symbol_object(project_root_path, normalized_symbol, is_symbol_of_interest))
     return filtered_symbols
