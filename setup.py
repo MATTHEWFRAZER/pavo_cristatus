@@ -37,11 +37,12 @@ setup(name=package_name,
       include_package_data=False,
       zip_safe=False,
       version=build_number,
+      entry_points={"console_scripts": "pavo-cristatus=pavo_cristatus.cli:main"},
       classifiers=[
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-            ]
+                  "Programming Language :: Python :: 3.5",
+                  "Programming Language :: Python :: 3.6",
+                  "Programming Language :: Python :: 3.7",
+                  ]
       )
 
 
