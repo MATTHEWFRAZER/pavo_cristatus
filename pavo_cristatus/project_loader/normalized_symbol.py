@@ -362,7 +362,7 @@ class NormalizedSymbol(object):
             return cls.find_symbol_indent_in_source_inner(inspect.getsource(symbol), name)
 
     @staticmethod
-    def find_symbol_indent_in_source_inner(source : str, name : str) -> str:
+    def find_symbol_indent_in_source_inner(source, name):
         class_pattern = get_class_pattern(name)
         function_pattern = get_function_pattern(name)
         if re.search(class_pattern, source):
