@@ -1,6 +1,7 @@
 import inspect
 from inspect import FullArgSpec
 import itertools
+import operator
 import re
 import typing
 from typing import Any, Pattern, AnyStr, Match, Optional
@@ -287,24 +288,25 @@ class NormalizedSymbol(object):
         it = iter(normalized_parent_source)
         more_itertools.consume(it, pattern_match.start())
         modified_parent_source = "".join(it)
-        lines = pavo_cristatus_split(modified_parent_source)
 
         # iterate until we find an indentation level that is less than what the child symbol starts at, construct source as we go
-        resolved_source = ""
         expected_indent_level = cls.find_symbol_indent_in_parent_symbol_source(normalized_parent_source,
                                                                                child_symbol_pattern)
 
         if expected_indent_level > 0:
-            for i, line in enumerate(lines):
-                if i > 0 and cls.get_indentation_level(line) < expected_indent_level and line.strip():
-                    break
-                resolved_source += line + "\n"
+            predicate = operator.lt
         else:
-            for i, line in enumerate(lines):
-                if i > 0 and cls.get_indentation_level(line) == expected_indent_level and line.strip():
-                    break
-                resolved_source += line + "\n"
+            predicate = operator.eq
 
+        return cls.get_source_using_expected_indent(pavo_cristatus_split(modified_parent_source), expected_indent_level, predicate)
+
+    @classmethod
+    def get_source_using_expected_indent(cls, lines, expected_indent_level, predicate):
+        resolved_source = ""
+        for i, line in enumerate(lines):
+            if i > 0 and predicate(cls.get_indentation_level(line), expected_indent_level) and line.strip():
+                break
+            resolved_source += line + "\n"
         return resolved_source
 
     @classmethod
