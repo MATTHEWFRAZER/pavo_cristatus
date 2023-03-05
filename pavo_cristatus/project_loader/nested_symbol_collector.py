@@ -31,10 +31,6 @@ def collect_nested_symbols_in_object_dict(normalized_symbol):
         if type(nested_symbol) == property:
             continue
 
-        # TODO: handle static methods
-        if type(nested_symbol) == staticmethod:
-            continue
-
         if nested_symbol is None:
             continue
         # there is potential in the case of a decorator where the symbol's name does not match its name in the namespace
