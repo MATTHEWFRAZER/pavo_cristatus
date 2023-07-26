@@ -1,10 +1,10 @@
 from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFakeClass
 
-from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
+from six import with_metaclass
 
 __all__ = ["ModuleFakeClassWithNestedLambdaDecoratedCallables"]
 
-class ModuleFakeClassWithNestedLambdaDecoratedCallables(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithNestedLambdaDecoratedCallables(with_metaclass(ModuleFakeClass)):
 
     def symbol_of_interest(self, a, b):
         @(lambda f: lambda self, x, y: f(self, x, y))

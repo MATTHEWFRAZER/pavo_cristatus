@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
+from six import with_metaclass
 
 from pavo_cristatus.project_loader import symbol_collector
 from pavo_cristatus.project_loader.normalized_symbol import NormalizedSymbol
@@ -32,14 +32,14 @@ unit_test_path = os.path.split(__file__)[0]
 annotated_path = os.path.normpath(os.path.join(unit_test_path, "doubles", "module_fakes", "annotated"))
 project_root_path = os.path.normpath(os.path.join(unit_test_path, "..", "..")).replace("\\", "\\\\")
 
-class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithNestedAnnotatedFunction(with_metaclass(ModuleFakeClass)):
     def non_symbol_of_interest(self, a : int, b : str) -> bool: pass
 
     def symbol_of_interest(self, a : int, b : str) -> bool:
         def nested(a : int, b : str) -> bool: pass
 
 
-class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(with_metaclass(ModuleFakeClass)):
     def non_symbol_of_interest(self, a : int, b : str) -> bool: pass
 
 

@@ -1,6 +1,6 @@
-from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
-
 from pavo_cristatus.tests.doubles.module_fakes.module_fake_class import ModuleFakeClass
+
+from six import with_metaclass
 
 __all__ = ["ModuleFakeClassWithMultiplyDecoratedCallables"]
 
@@ -19,7 +19,7 @@ def decorator3(func):
         return func(self, x, y)
     return nested
 
-class ModuleFakeClassWithMultiplyDecoratedCallables(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithMultiplyDecoratedCallables(with_metaclass(ModuleFakeClass)):
 
     @decorator
     @decorator2
