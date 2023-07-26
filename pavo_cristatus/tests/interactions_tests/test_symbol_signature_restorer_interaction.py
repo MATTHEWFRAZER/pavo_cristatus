@@ -4,7 +4,7 @@ import os
 import sys
 
 import pytest
-from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
+from six import with_metaclass
 
 from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatus
 from pavo_cristatus.interactions.symbol_signature_restorer_interaction.symbol_signature_restorer_interaction import interact
@@ -34,14 +34,14 @@ from pavo_cristatus.utilities import create_data_item_id
 unit_test_path = os.path.split(__file__)[0]
 project_root_path = os.path.normpath(os.path.join(unit_test_path, "..", "..")).replace("\\", "\\\\")
 
-class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithNestedAnnotatedFunction(with_metaclass(ModuleFakeClass)):
     def non_symbol_of_interest(self, a : int, b : str) -> bool: pass
 
     def symbol_of_interest(self, a : int, b : str) -> bool:
         def nested(a : int, b : str) -> bool: pass
 
 
-class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(with_metaclass(ModuleFakeClass)):
     def non_symbol_of_interest(self, a : int, b : str) -> bool: pass
 
 
