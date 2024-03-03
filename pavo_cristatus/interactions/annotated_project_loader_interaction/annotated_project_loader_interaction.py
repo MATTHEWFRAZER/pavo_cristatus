@@ -1,3 +1,5 @@
+import traceback
+
 from pavo_cristatus.interactions.pavo_cristatus_result import PavoCristatusResult
 from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatus
 
@@ -14,4 +16,4 @@ def interact(directory_walk_configuration):
     try:
         return PavoCristatusResult(load_annotated_project(directory_walk_configuration.project_root_path, directory_walk_configuration.directories_to_ignore), PavoCristatusStatus.SUCCESS)
     except Exception as ex:
-        return PavoCristatusResult(None, PavoCristatusStatus.FAILURE, str(ex))
+        return PavoCristatusResult(None, PavoCristatusStatus.FAILURE, traceback.format_exc())
