@@ -34,10 +34,13 @@ def is_annotated_symbol_of_interest_inner(module, normalized_symbol):
     # TODO: get rid of these checks (they are already someplace else)
     if None in (module, normalized_symbol):
         return False
+
     # we check this because imported objects might get included
     if not is_symbol_defined_in_module(module, normalized_symbol):
         return False
+
     return is_symbol_callable(normalized_symbol.symbol) and does_symbol_have_type_hint_annotations(normalized_symbol)
+
 
 def is_non_annotated_symbol_of_interest_inner(module, normalized_symbol):
     # TODO: get rid of these checks (they are already someplace else)
@@ -51,9 +54,9 @@ def is_non_annotated_symbol_of_interest_inner(module, normalized_symbol):
 def is_annotated_symbol_of_interest(module, normalized_symbol):
     if not is_symbol_valid(module, normalized_symbol):
         return False
-    return is_annotated_symbol_of_interest_inner(module, normalized_symbol) or \
-           does_symbol_contain_symbol_of_interest(module, normalized_symbol, is_annotated_symbol_of_interest_inner)
 
+    return is_annotated_symbol_of_interest_inner(module, normalized_symbol) or does_symbol_contain_symbol_of_interest(module, normalized_symbol,
+                                                           is_annotated_symbol_of_interest_inner)
 def is_non_annotated_symbol_of_interest(module, normalized_symbol):
     if not is_symbol_valid(module, normalized_symbol):
         return False
