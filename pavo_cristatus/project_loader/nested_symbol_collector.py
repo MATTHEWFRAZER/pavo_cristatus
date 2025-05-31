@@ -32,8 +32,8 @@ def collect_nested_symbols_in_object_dict(normalized_symbol):
             continue
 
         # TODO: handle static methods
-        if type(nested_symbol) in (staticmethod, classmethod):
-            continue
+        #if type(nested_symbol) in (staticmethod, classmethod):
+        #    continue
 
         if nested_symbol is None:
             continue
