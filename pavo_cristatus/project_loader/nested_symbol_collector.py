@@ -31,9 +31,9 @@ def collect_nested_symbols_in_object_dict(normalized_symbol):
         if type(nested_symbol) == property:
             continue
 
-        # TODO: handle static methods
+        # if we do not access __func__, we risk inspecting the staticmethod/classmethod wrapper instead
         if type(nested_symbol) in (staticmethod, classmethod):
-            continue
+            nested_symbol = nested_symbol.__func__
 
         if nested_symbol is None:
             continue
