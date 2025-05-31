@@ -32,12 +32,14 @@ def safe_open_hook(*args, **kwargs):
 
 symbols_under_test = [ModuleFakeClassWithCallables.non_symbol_of_interest,
                       ModuleFakeClassWithClasses.NonSymbolOfInterest,
+                      ModuleFakeClassWithClasses.SymbolOfInterestClassMethod,
+                      ModuleFakeClassWithClasses.SymbolOfInterestStaticMethod,
                       ModuleFakeClassWithInheritedAnnotatedCallables.SymbolOfInterest,
                       ModuleFakeClassWithInheritedAnnotatedCallables.NonSymbolOfInterest,
                       ModuleFakeClassWithClassesWithNestedAnnotatedCallables.NonSymbolOfInterest,
-                      ModuleFakeClassWithClassesWithNestedAnnotatedCallables.SymbolOfInterest]
+                      ModuleFakeClassWithClassesWithNestedAnnotatedCallables.SymbolOfInterest,]
 
-# these are only supported by python 3.9 (all of the following symbols will cause syntax errors)
+# these are only supported by python 3.9 (all the following symbols will cause syntax errors)
 if sys.version_info >= (3, 9):
     from pavo_cristatus.tests.doubles.module_fakes.annotated.module_fake_class_with_nested_lambda_decorated_classes import \
         ModuleFakeClassWithNestedLambdaDecoratedClasses
