@@ -3,7 +3,7 @@ import sys
 import os
 
 import pytest
-from trochilidae.interoperable_with_metaclass import interoperable_with_metaclass_future
+from six import with_metaclass
 
 from pavo_cristatus.interactions.pavo_cristatus_status import PavoCristatusStatus
 from pavo_cristatus.module_symbols.module_symbols import ModuleSymbols
@@ -33,14 +33,14 @@ from pavo_cristatus.tests.utilities import get_nested_arg_specs, get_module_qual
 from pavo_cristatus.utilities import create_data_item_id
 
 
-class ModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class ModuleFakeClassWithNestedAnnotatedFunction(with_metaclass(ModuleFakeClass)):
     def non_symbol_of_interest(self, a : int, b : str) -> bool: pass
 
     def symbol_of_interest(self, a : int, b : str) -> bool:
         def nested(a : int, b : str) -> bool: pass
 
 
-class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(interoperable_with_metaclass_future(ModuleFakeClass)):
+class AnnotatedModuleFakeClassWithNestedAnnotatedFunction(with_metaclass(ModuleFakeClass)):
     def non_symbol_of_interest(self, a : int, b : str) -> bool: pass
 
 

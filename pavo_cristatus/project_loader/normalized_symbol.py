@@ -148,6 +148,7 @@ class NormalizedSymbol(object):
         if normalized_parent_symbol is not None:
             if normalized_child_name is None:
                 raise ValueError("normalized parent must provide child to normalize with its name")
+
             normalized_parent_source = normalized_parent_symbol.source
             class_pattern = get_class_pattern(normalized_child_name)
             function_pattern = get_function_pattern(normalized_child_name)
@@ -287,6 +288,8 @@ class NormalizedSymbol(object):
     def resolve_source_from_match(cls, normalized_parent_source : str, pattern_match : Match[AnyStr], child_symbol_pattern : Pattern[AnyStr]) -> str:
         it = iter(normalized_parent_source)
         more_itertools.consume(it, pattern_match.start())
+        # TODO: is modified_parent_source appropriate name? should we change it so that is reflects that it starts
+        #       at our child symbol (same with get_source_using_expected_indent)
         modified_parent_source = "".join(it)
 
         # iterate until we find an indentation level that is less than what the child symbol starts at, construct source as we go
@@ -304,6 +307,8 @@ class NormalizedSymbol(object):
     def get_source_using_expected_indent(cls, lines, expected_indent_level, predicate):
         resolved_source = ""
         for i, line in enumerate(lines):
+            # TODO: handle edge case if lines at 0 is our symbol and handle when function signature or the like
+            #       dedent, but it does not reflect the actual end of the symbol's source
             if i > 0 and predicate(cls.get_indentation_level(line), expected_indent_level) and line.strip():
                 break
             resolved_source += line + "\n"

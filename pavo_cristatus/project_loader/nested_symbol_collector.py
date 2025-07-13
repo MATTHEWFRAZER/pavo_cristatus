@@ -23,13 +23,17 @@ def collect_nested_symbols(normalized_symbol):
 def collect_nested_symbols_in_object_dict(normalized_symbol):
     """
     from a symbol object, get its values list
-    :param normalized_symbol: used to find nested symbols in a a symbols object dict
+    :param normalized_symbol: used to find nested symbols in a symbols object dict
     :return: generator of NormalizedSymbol
     """
     for nested_symbol_name, nested_symbol in normalized_symbol.symbol.__dict__.items():
         # TODO: handle properties
         if type(nested_symbol) == property:
             continue
+
+        # if we do not access __func__, we risk inspecting the staticmethod/classmethod wrapper instead
+        if type(nested_symbol) in (staticmethod, classmethod):
+            nested_symbol = nested_symbol.__func__
 
         if nested_symbol is None:
             continue

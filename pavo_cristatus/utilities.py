@@ -85,6 +85,15 @@ def pavo_cristatus_get_source(symbol):
     else:
         return symbol.pavo_cristatus_original_source
 
+def pavo_cristatus_get_source_for_module(module):
+    """
+    this function is needed for the edge case that a module is empty, that will cause on OSError
+    """
+    try:
+        return pavo_cristatus_get_source(module)
+    except Exception:
+        return ""
+
 def pavo_cristatus_get_argument_annotation(arg_spec, argument):
     result = str()
     try:

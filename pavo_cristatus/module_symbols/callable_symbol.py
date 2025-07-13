@@ -112,8 +112,8 @@ class CallableSymbol(AbstractSymbol):
         comment = "#".join(postfix_line.split("#")[1:])
         postfix_line = postfix_line.split("#")[0]
 
-        lambda_string = "lambda :".join(re.split("lambda\s*:", postfix_line)[1:])
-        postfix_line = re.split("lambda\s*:", postfix_line)[0]
+        lambda_string = "lambda :".join(re.split(r"lambda\s*:", postfix_line)[1:])
+        postfix_line = re.split(r"lambda\s*:", postfix_line)[0]
 
         if lambda_string:
             lambda_string = "lambda :" + lambda_string
@@ -314,13 +314,13 @@ class CallableSymbol(AbstractSymbol):
                 open_parenthesis += no_comment_line.count("(")
                 open_parenthesis -= no_comment_line.count(")")
                 if open_parenthesis == 0:
-                    lambda_string =  "lambda :".join(re.split("lambda\s*:", no_comment_line)[1:])
+                    lambda_string =  "lambda :".join(re.split(r"lambda\s*:", no_comment_line)[1:])
 
                     if lambda_string:
                         lambda_string = "lambda :" + lambda_string
 
 
-                    no_comment_line = re.split("lambda\s*:", no_comment_line)[0]
+                    no_comment_line = re.split(r"lambda\s*:", no_comment_line)[0]
 
 
                     # we can possibly get an incorrect postfix from the first line of the signature, correct it here
@@ -331,7 +331,7 @@ class CallableSymbol(AbstractSymbol):
 
                     # find the correct start of postfixes with the new and corrected signature
                     signature_no_comment_line = lines[signature_line].split("#")[0]
-                    signature_no_lambda_line = re.split("lambda\s*:", signature_no_comment_line)[0]
+                    signature_no_lambda_line = re.split(r"lambda\s*:", signature_no_comment_line)[0]
 
 
                     lines[signature_line] = lines[signature_line][:signature_no_lambda_line.rfind(":") + 1] + postfix + lambda_string + comment
