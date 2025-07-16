@@ -36,7 +36,7 @@ jobs:
           git branch $branch_name
           git push --set-upstream origin $branch_name
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          pip install setuptools wheel twine build
           git checkout $branch_name
           echo $branch_name | sed "s/-release//g" > build_version.txt
           python -m build
